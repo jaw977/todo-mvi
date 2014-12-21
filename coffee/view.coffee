@@ -19,14 +19,14 @@ _render = (ev) ->
     h 'br'
     "Add Todo: "
     h 'input', size: 50, onchange: event('create$')
-    #h 'br'
-    #h 'button', type: 'button', 'Search'
-    #' '
-    #h 'select', onchange: event('search$'),
-    #  h 'option', value: '0,1', 'Ready + Open'
-    #  for status in [1..3]
-    #    h 'option', value: status, model.statusLabels[status]
-    #  h 'option', value: '', 'All'
+    h 'br'
+    h 'button', type: 'button', onclick: event('search$'), 'Search'
+    ' '
+    h 'select', onchange: event('search$'),
+      h 'option', value: 'open', 'Open'
+      h 'option', value: 'star', 'Starred'
+      h 'option', value: 'close', 'Closed'
+      h 'option', value: 'all', 'All'
     #if ev.status and ev.status[0] == 3 then h 'button', type: 'button', onclick: event('purge$'), 'Purge Deleted'
     h 'br'
     h 'br'

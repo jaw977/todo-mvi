@@ -1,9 +1,13 @@
 (function() {
-  var _close$, _create$, _db, _delete$, _editName$, _export$, _load$, _nextOrder, _putTodo, _star$, _toView, _todos, _updateName$;
+  var _close$, _create$, _db, _delete$, _editName$, _export$, _load$, _nextOrder, _putTodo, _search$, _star$, _toView, _todos, _updateName$, _visibleIds;
 
-  _toView = {};
+  _toView = {
+    status: 'open'
+  };
 
   _todos = {};
+
+  _visibleIds = [];
 
   _db = new PouchDB('todo-mvi');
 
@@ -37,15 +41,17 @@
   });
 
   _create$ = intent.create$.map(function(name) {
-    var todo;
+    var id, todo;
+    id = new Date().toISOString();
     todo = {
-      _id: new Date().toISOString(),
+      _id: id,
       name: name,
       order: _nextOrder++,
       open: util.date.today()
     };
-    _todos[todo._id] = todo;
-    return _putTodo(todo);
+    _todos[id] = todo;
+    _putTodo(todo);
+    return _visibleIds.push(id);
   });
 
   _star$ = intent.star$.map(function(id) {
@@ -92,12 +98,31 @@
     return _toView.idEditing = null;
   });
 
+  _search$ = intent.search$.merge(_load$).map(function(status) {
+    var id, todo;
+    _toView.status = status = status || _toView.status;
+    return _visibleIds = (function() {
+      var _results;
+      _results = [];
+      for (id in _todos) {
+        todo = _todos[id];
+        if (status === 'open' && todo.close) {
+          continue;
+        }
+        if (status === 'star' && todo.status !== 'star') {
+          continue;
+        }
+        if (status === 'close' && !todo.close) {
+          continue;
+        }
+        _results.push(id);
+      }
+      return _results;
+    })();
+  });
+
 
   /*
-  _search$ = intent.search$.map (status) ->
-    _toView.status = if status.length
-      status.split(',').map (s) -> +s
-  
   _purge$ = intent.purge$.map ->
     for id, todo of _todos
       continue unless _statusLabels[todo.status] == 'Deleted'
@@ -116,13 +141,9 @@
       status = todo.status ? "status:" + todo.status + " " : "";
       return "" + closed + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(_create$, _star$, _close$, _delete$, _load$, _export$, _editName$, _updateName$).map(function() {
-      _toView.todos = _.filter(_todos, function(todo) {
-        if (_toView.status) {
-          return _.contains(_toView.status, todo.status);
-        } else {
-          return true;
-        }
+    todos$: Rx.Observable.merge(_create$, _star$, _close$, _delete$, _search$, _export$, _editName$, _updateName$).map(function() {
+      _toView.todos = _visibleIds.map(function(id) {
+        return _todos[id];
       });
       return _toView;
     })

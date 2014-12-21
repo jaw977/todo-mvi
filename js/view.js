@@ -29,7 +29,20 @@
     }, 'Export'), ev.showExport ? h('textarea', ev.todos.map(model.exportTodo).join("\n")) : void 0, h('br'), "Add Todo: ", h('input', {
       size: 50,
       onchange: event('create$')
-    }), h('br'), h('br'), h('table', h('tr', (function() {
+    }), h('br'), h('button', {
+      type: 'button',
+      onclick: event('search$')
+    }, 'Search'), ' ', h('select', {
+      onchange: event('search$')
+    }, h('option', {
+      value: 'open'
+    }, 'Open'), h('option', {
+      value: 'star'
+    }, 'Starred'), h('option', {
+      value: 'close'
+    }, 'Closed'), h('option', {
+      value: 'all'
+    }, 'All')), h('br'), h('br'), h('table', h('tr', (function() {
       var _j, _len1, _ref1, _results;
       _ref1 = ['ID', 'Status', 'Open', 'Description'];
       _results = [];

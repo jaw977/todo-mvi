@@ -21,6 +21,7 @@ Plan:
 - VDOM.js - remove dom delegator
 - Add Documentation - README.md - Coffee - MIT License - VDOM.js
 - Put on GitHub
+- Use Immutable.js
 
 Notes:
 

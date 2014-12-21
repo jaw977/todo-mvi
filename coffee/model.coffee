@@ -1,8 +1,9 @@
 ## Dependencies: Rx, _(lodash), PouchDB, util, intent
 ## Exports: model
 
-_toView = {} #status: [0,1]
+_toView = status: 'open'
 _todos = {}
+_visibleIds = []
 _db = new PouchDB 'todo-mvi'
 _nextOrder = 0
 
@@ -20,13 +21,15 @@ _load$ = Rx.Observable.create (observer) ->
     observer.onNext()
 
 _create$ = intent.create$.map (name) ->
+  id = new Date().toISOString()
   todo =
-    _id: new Date().toISOString()
+    _id: id
     name: name
     order: _nextOrder++
     open: util.date.today()
-  _todos[todo._id] = todo
+  _todos[id] = todo
   _putTodo todo
+  _visibleIds.push id
 
 _star$ = intent.star$.map (id) ->
   todo = _todos[id]
@@ -59,11 +62,17 @@ _updateName$ = intent.updateName$.map (name) ->
     _putTodo todo
   _toView.idEditing = null
 
-###
-_search$ = intent.search$.map (status) ->
-  _toView.status = if status.length
-    status.split(',').map (s) -> +s
+_search$ = intent.search$
+  .merge _load$
+  .map (status) ->
+    _toView.status = status = status or _toView.status
+    _visibleIds = for id, todo of _todos
+      continue if status == 'open' and todo.close
+      continue if status == 'star' and todo.status != 'star'
+      continue if status == 'close' and not todo.close
+      id
 
+###
 _purge$ = intent.purge$.map ->
   for id, todo of _todos
     continue unless _statusLabels[todo.status] == 'Deleted'
@@ -81,9 +90,10 @@ _export$ = intent.export$.map -> _toView.showExport = not _toView.showExport
     "#{closed}#{todo.open} #{status}#{todo.name}"
     
   todos$:
-    Rx.Observable.merge _create$, _star$, _close$, _delete$, _load$, _export$, _editName$, _updateName$
+    Rx.Observable.merge _create$, _star$, _close$, _delete$, _search$, _export$, _editName$, _updateName$
       .map ->
-        _toView.todos = _.filter _todos, (todo) -> if _toView.status then _.contains _toView.status, todo.status else true
+        #_toView.todos = _.filter _todos, (todo) -> if _toView.status then _.contains _toView.status, todo.status else true
+        _toView.todos = _visibleIds.map (id) -> _todos[id]
         _toView
 
 util.init$.onNext "model"
