@@ -92,7 +92,6 @@ _export$ = intent.export$.map -> _toView.showExport = not _toView.showExport
   todos$:
     Rx.Observable.merge _create$, _star$, _close$, _delete$, _search$, _export$, _editName$, _updateName$
       .map ->
-        #_toView.todos = _.filter _todos, (todo) -> if _toView.status then _.contains _toView.status, todo.status else true
         _toView.todos = _visibleIds.map (id) -> _todos[id]
         _toView
 

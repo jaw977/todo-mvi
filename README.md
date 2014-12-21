@@ -22,6 +22,7 @@ Plan:
 - Add Documentation - README.md - Coffee - MIT License - VDOM.js
 - Put on GitHub
 - Use Immutable.js
+- DONE View - allow h.option instead of h 'option'
 
 Notes:
 

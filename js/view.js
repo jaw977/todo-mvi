@@ -1,5 +1,5 @@
 (function() {
-  var stream, view, _i, _len, _oldTree, _ref, _render, _rootNode,
+  var stream, view, _htmlTag, _i, _len, _oldTree, _ref, _render, _rootNode,
     __slice = [].slice;
 
   view = this.view = {};
@@ -10,45 +10,55 @@
     view[stream] = new Rx.Subject();
   }
 
+  _htmlTag = function() {
+    var attrs, children, tag;
+    tag = arguments[0], children = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    attrs = children.length && _.isPlainObject(children[0]) ? children.shift() : {};
+    return VDOM.h(tag, attrs, _.flatten(children, true));
+  };
+
+  ['div', 'span', 'button', 'br', 'input', 'textarea', 'select', 'option', 'table', 'tr', 'th', 'td'].forEach(function(tag) {
+    return _htmlTag[tag] = function() {
+      var children;
+      children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return _htmlTag.apply(null, [tag].concat(__slice.call(children)));
+    };
+  });
+
   _render = function(ev) {
     var color, event, h, heading, isDeleted, mark, todo;
-    h = function() {
-      var attrs, children, tag;
-      tag = arguments[0], children = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      attrs = children.length && _.isPlainObject(children[0]) ? children.shift() : {};
-      return VDOM.h(tag, attrs, _.flatten(children, true));
-    };
+    h = _htmlTag;
     event = function(stream) {
       return function(ev) {
         return view[stream].onNext(ev);
       };
     };
-    return h('div', h('button', {
+    return h.div({}, h.button({
       type: 'button',
       onclick: event('export$')
-    }, 'Export'), ev.showExport ? h('textarea', ev.todos.map(model.exportTodo).join("\n")) : void 0, h('br'), "Add Todo: ", h('input', {
+    }, 'Export'), ev.showExport ? h.textarea(ev.todos.map(model.exportTodo).join("\n")) : void 0, h.br(), "Add Todo: ", h.input({
       size: 50,
       onchange: event('create$')
-    }), h('br'), h('button', {
+    }), h.br(), h.button({
       type: 'button',
       onclick: event('search$')
-    }, 'Search'), ' ', h('select', {
+    }, 'Search'), ' ', h.select({
       onchange: event('search$')
-    }, h('option', {
+    }, h.option({
       value: 'open'
-    }, 'Open'), h('option', {
+    }, 'Open'), h.option({
       value: 'star'
-    }, 'Starred'), h('option', {
+    }, 'Starred'), h.option({
       value: 'close'
-    }, 'Closed'), h('option', {
+    }, 'Closed'), h.option({
       value: 'all'
-    }, 'All')), h('br'), h('br'), h('table', h('tr', (function() {
+    }, 'All')), h.br(), h.br(), h.table({}, h.tr({}, (function() {
       var _j, _len1, _ref1, _results;
       _ref1 = ['ID', 'Status', 'Open', 'Description'];
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         heading = _ref1[_j];
-        _results.push(h('th', heading));
+        _results.push(h.th(heading));
       }
       return _results;
     })()), (function() {
@@ -57,29 +67,29 @@
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         todo = _ref1[_j];
-        _results.push(h('tr', {
+        _results.push(h.tr({
           id: todo._id
-        }, h('td', todo.order.toString()), h('td', h('button', {
+        }, h.td(todo.order.toString()), h.td({}, h.button({
           type: 'button',
           value: todo._id,
           onclick: event('star$')
-        }, "★"), h('button', {
+        }, "★"), h.button({
           type: 'button',
           value: todo._id,
           onclick: event('close$')
-        }, "✓"), h('button', {
+        }, "✓"), h.button({
           type: 'button',
           value: todo._id,
           onclick: event('delete$')
-        }, "×")), h('td', util.date.format(todo.open)), h('td', todo.close ? (isDeleted = todo.status === 'delete', color = isDeleted ? "red" : "green", mark = isDeleted ? "×" : "✓", h('span', {
+        }, "×")), h.td(util.date.format(todo.open)), h.td({}, todo.close ? (isDeleted = todo.status === 'delete', color = isDeleted ? "red" : "green", mark = isDeleted ? "×" : "✓", h.span({
           style: "color:" + color
-        }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : todo.status === 'star' ? h('span', {
+        }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : todo.status === 'star' ? h.span({
           style: "color:blue"
-        }, "★ ") : "", ev.idEditing === todo._id ? h('input', {
+        }, "★ ") : "", ev.idEditing === todo._id ? h.input({
           size: 50,
           value: todo.name,
           onkeydown: event('updateName$')
-        }) : h('span', {
+        }) : h.span({
           ondblclick: event('editName$')
         }, todo.name))));
       }
