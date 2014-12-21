@@ -3,7 +3,7 @@
 
   intent = this.intent = {};
 
-  _ref = ['updateStatus$', 'search$'];
+  _ref = ['star$', 'close$', 'delete$', 'search$'];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     stream = _ref[_i];
     intent[stream] = view[stream].map(function(ev) {

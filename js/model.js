@@ -1,13 +1,9 @@
 (function() {
-  var _create$, _db, _editName$, _export$, _load$, _nextOrder, _purge$, _putTodo, _search$, _statusLabels, _toView, _todos, _updateName$, _updateStatus$;
+  var _close$, _create$, _db, _delete$, _editName$, _export$, _load$, _nextOrder, _putTodo, _star$, _toView, _todos, _updateName$;
 
-  _toView = {
-    status: [0, 1]
-  };
+  _toView = {};
 
   _todos = {};
-
-  _statusLabels = ['Ready', 'Open', 'Closed', 'Deleted'];
 
   _db = new PouchDB('todo-mvi');
 
@@ -45,7 +41,6 @@
     todo = {
       _id: new Date().toISOString(),
       name: name,
-      status: 0,
       order: _nextOrder++,
       open: util.date.today()
     };
@@ -53,15 +48,32 @@
     return _putTodo(todo);
   });
 
-  _updateStatus$ = intent.updateStatus$.map(function(id) {
-    var statusLabel, todo;
+  _star$ = intent.star$.map(function(id) {
+    var todo;
     todo = _todos[id];
-    todo.status = (todo.status + 1) % _statusLabels.length;
-    statusLabel = _statusLabels[todo.status];
-    if (statusLabel === 'Closed') {
-      todo.close = util.date.today();
-    } else if (statusLabel === 'Ready') {
+    if (!todo.close) {
+      todo.status = todo.status === 'star' ? '' : 'star';
+      return _putTodo(todo);
+    }
+  });
+
+  _close$ = intent.close$.map(function(id) {
+    var todo;
+    todo = _todos[id];
+    todo.close = todo.close ? false : util.date.today();
+    delete todo.status;
+    return _putTodo(todo);
+  });
+
+  _delete$ = intent.delete$.map(function(id) {
+    var todo;
+    todo = _todos[id];
+    if (todo.close) {
       todo.close = false;
+      delete todo.status;
+    } else {
+      todo.close = util.date.today();
+      todo.status = "delete";
     }
     return _putTodo(todo);
   });
@@ -80,39 +92,31 @@
     return _toView.idEditing = null;
   });
 
-  _search$ = intent.search$.map(function(status) {
-    return _toView.status = status.length ? status.split(',').map(function(s) {
-      return +s;
-    }) : void 0;
-  });
 
-  _purge$ = intent.purge$.map(function() {
-    var id, todo, _results;
-    _results = [];
-    for (id in _todos) {
-      todo = _todos[id];
-      if (_statusLabels[todo.status] !== 'Deleted') {
-        continue;
-      }
-      _db.remove(todo);
-      _results.push(delete _todos[id]);
-    }
-    return _results;
-  });
+  /*
+  _search$ = intent.search$.map (status) ->
+    _toView.status = if status.length
+      status.split(',').map (s) -> +s
+  
+  _purge$ = intent.purge$.map ->
+    for id, todo of _todos
+      continue unless _statusLabels[todo.status] == 'Deleted'
+      _db.remove todo
+      delete _todos[id]
+   */
 
   _export$ = intent.export$.map(function() {
     return _toView.showExport = !_toView.showExport;
   });
 
   this.model = {
-    statusLabels: _statusLabels.slice(0),
     exportTodo: function(todo) {
       var closed, status;
       closed = todo.close ? "x " + todo.close + " " : "";
-      status = todo.status === 1 || todo.status === 3 ? "status:" + statusLabels[todo.status] + " " : "";
+      status = todo.status ? "status:" + todo.status + " " : "";
       return "" + closed + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(_create$, _load$, _updateStatus$, _search$, _purge$, _export$, _editName$, _updateName$).map(function() {
+    todos$: Rx.Observable.merge(_create$, _star$, _close$, _delete$, _load$, _export$, _editName$, _updateName$).map(function() {
       _toView.todos = _.filter(_todos, function(todo) {
         if (_toView.status) {
           return _.contains(_toView.status, todo.status);

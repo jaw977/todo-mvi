@@ -1,7 +1,7 @@
 Plan:
 
-- Create Git Repo: index.html, gulpfile, coffee, js
-- Document structure: name=String, open=YYYY-MM-DD, close=YYYY-MM-DD, status=star/delete
+- DONE Create Git Repo: index.html, gulpfile, coffee, js
+- DONE Document structure: name=String, open=YYYY-MM-DD, close=YYYY-MM-DD, status="star"/"delete", order=number
 - Actions: 
   - Open: Star, Close, Delete
   - Close: Unclose, Recur
@@ -21,3 +21,7 @@ Plan:
 - VDOM.js - remove dom delegator
 - Add Documentation - README.md - Coffee - MIT License - VDOM.js
 - Put on GitHub
+
+Notes:
+
+- https://medium.com/@garychambers108/functional-reactive-react-js-b04a8d97a540

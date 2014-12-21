@@ -3,7 +3,7 @@
 
 view = @view = {}
 
-for stream in ['create$','updateStatus$','editName$','updateName$','search$','purge$','export$']
+for stream in ['create$','star$','close$','delete$','editName$','updateName$','search$','purge$','export$']
   view[stream] = new Rx.Subject()
 
 _render = (ev) ->
@@ -19,15 +19,15 @@ _render = (ev) ->
     h 'br'
     "Add Todo: "
     h 'input', size: 50, onchange: event('create$')
-    h 'br'
-    h 'button', type: 'button', 'Search'
-    ' '
-    h 'select', onchange: event('search$'),
-      h 'option', value: '0,1', 'Ready + Open'
-      for status in [1..3]
-        h 'option', value: status, model.statusLabels[status]
-      h 'option', value: '', 'All'
-    if ev.status and ev.status[0] == 3 then h 'button', type: 'button', onclick: event('purge$'), 'Purge Deleted'
+    #h 'br'
+    #h 'button', type: 'button', 'Search'
+    #' '
+    #h 'select', onchange: event('search$'),
+    #  h 'option', value: '0,1', 'Ready + Open'
+    #  for status in [1..3]
+    #    h 'option', value: status, model.statusLabels[status]
+    #  h 'option', value: '', 'All'
+    #if ev.status and ev.status[0] == 3 then h 'button', type: 'button', onclick: event('purge$'), 'Purge Deleted'
     h 'br'
     h 'br'
     h 'table',
@@ -37,15 +37,19 @@ _render = (ev) ->
       for todo in ev.todos
         h 'tr', id: todo._id,
           h 'td', todo.order.toString()
-          h 'td', h 'button', type: 'button', value: todo._id, onclick: event('updateStatus$'), model.statusLabels[todo.status] 
+          h 'td',
+            h 'button', type: 'button', value: todo._id, onclick: event('star$'), "★"
+            h 'button', type: 'button', value: todo._id, onclick: event('close$'), "✓"
+            h 'button', type: 'button', value: todo._id, onclick: event('delete$'), "×"
           h 'td', util.date.format todo.open
-      #    #h 'span', style: 'text-decoration:' + (if todo.complete then 'line-through' else 'none'), "#{todo.order}: #{todo.name}"
           h 'td',
             if todo.close
-              isDeleted = todo.status == 3
+              isDeleted = todo.status == 'delete'
               color = if isDeleted then "red" else "green"
               mark = if isDeleted then "×" else "✓"
               h 'span', style: "color:#{color}", "#{mark} #{util.date.format todo.close} "
+            else if todo.status == 'star'
+              h 'span', style: "color:blue", "★ "
             else ""
             if ev.idEditing == todo._id
               h 'input', size: 50, value: todo.name, onkeydown: event('updateName$')
