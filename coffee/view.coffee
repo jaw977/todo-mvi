@@ -3,7 +3,7 @@
 
 view = @view = {}
 
-for stream in ['create$','star$','close$','delete$','editName$','editOpen$','updateName$','updateOpen$','search$','purge$','export$']
+for stream in ['create$','star$','close$','delete$','editName$','editOpen$','updateName$','updateOpen$','search$','purge$','export$','sort$']
   view[stream] = new Rx.Subject()
 
 _htmlTag = (tag, children...) ->
@@ -16,6 +16,7 @@ _render = (ev) ->
   #console.log ev
   h = _htmlTag
   event = (stream) -> (ev) -> view[stream].onNext ev
+  today = util.date.today()
 
   h.div {},
     h.button type: 'button', onclick: event('export$'), 'Export'
@@ -32,6 +33,10 @@ _render = (ev) ->
       h.option value: 'close', 'Closed'
       h.option value: 'all', 'All'
     #if ev.status and ev.status[0] == 3 then h 'button', type: 'button', onclick: event('purge$'), 'Purge Deleted'
+    h.select onchange: event('sort$'),
+      h.option value: 'star,open,name', 'Starred First, then opened earliest first'
+      h.option value: 'star,name', 'Starred First'
+      h.option value: 'close,name', 'Closed earliest first'
     h.br()
     h.br()
     h.table {},
@@ -39,7 +44,7 @@ _render = (ev) ->
         for heading in ['ID','Status','Open','Description']
           h.th heading
       for todo in ev.todos
-        h.tr id: todo._id,
+        h.tr id: todo._id, style: (if todo.open > today then "color:silver" else "color:black"),
           h.td todo.order.toString()
           h.td {},
             h.button type: 'button', value: todo._id, onclick: event('star$'), "★"
@@ -51,11 +56,10 @@ _render = (ev) ->
             h.td ondblclick: event('editOpen$'), util.date.format todo.open
           h.td {},
             if todo.close
-              isDeleted = todo.status == 'delete'
-              color = if isDeleted then "red" else "green"
-              mark = if isDeleted then "×" else "✓"
+              color = if todo.deleted then "red" else "green"
+              mark = if todo.deleted then "×" else "✓"
               h.span style: "color:#{color}", "#{mark} #{util.date.format todo.close} "
-            else if todo.status == 'star'
+            else if todo.star
               h.span style: "color:blue", "★ "
             else ""
             if ev.idEditing == todo._id and ev.fieldEditing == 'name'

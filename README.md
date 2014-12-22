@@ -1,14 +1,14 @@
 Plan:
 
 - DONE Create Git Repo: index.html, gulpfile, coffee, js
-- DONE Document structure: name=String, open=YYYY-MM-DD, close=YYYY-MM-DD, status="star"/"delete", order=number
+- DONE Document structure: name=String, open=YYYY-MM-DD, close=YYYY-MM-DD, star=bool, deleted=bool, order=number
 - Actions: 
   - Open: Star, Close, Delete
   - Close: Unclose, Recur
   - Automatic Recur when closed and recur:+3d key
   - Multi-update
   - Purge
-- Sort: When button pressed or dropdown changed.  Star + Open Date + Name; Star + Name
+- DONE Sort: When button pressed or dropdown changed.  Star + Open Date + Name; Star + Name; Close Date + Name
 - Filter: When button pressed or input changed
   - Select All or Open (default) or Starred or Closed
   - Open date range, close date range 

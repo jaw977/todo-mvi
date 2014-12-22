@@ -3,7 +3,7 @@
 
 intent = @intent = {}
 
-for stream in ['star$','close$','delete$','search$']
+for stream in ['star$','close$','delete$','search$','sort$']
   intent[stream] = view[stream].map (ev) -> ev.target.value
 
 for stream in ['purge$','export$']

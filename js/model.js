@@ -1,8 +1,9 @@
 (function() {
-  var _close$, _create$, _db, _delete$, _edit$, _editName$, _editOpen$, _export$, _load$, _nextOrder, _putTodo, _search$, _star$, _toView, _todos, _update$, _updateName$, _updateOpen$, _visibleIds;
+  var _close$, _create$, _db, _delete$, _edit$, _editName$, _editOpen$, _export$, _load$, _nextOrder, _putTodo, _search$, _sort$, _star$, _toView, _todos, _update$, _updateName$, _updateOpen$, _visibleIds;
 
   _toView = {
-    status: 'open'
+    status: 'open',
+    sort: 'star,open,name'
   };
 
   _todos = {};
@@ -58,7 +59,7 @@
     var todo;
     todo = _todos[id];
     if (!todo.close) {
-      todo.status = todo.status === 'star' ? '' : 'star';
+      todo.star = !todo.star;
       return _putTodo(todo);
     }
   });
@@ -67,7 +68,8 @@
     var todo;
     todo = _todos[id];
     todo.close = todo.close ? false : util.date.today();
-    delete todo.status;
+    delete todo.star;
+    delete todo.deleted;
     return _putTodo(todo);
   });
 
@@ -76,10 +78,11 @@
     todo = _todos[id];
     if (todo.close) {
       todo.close = false;
-      delete todo.status;
+      delete todo.star;
+      delete todo.deleted;
     } else {
       todo.close = util.date.today();
-      todo.status = "delete";
+      todo.deleted = true;
     }
     return _putTodo(todo);
   });
@@ -118,10 +121,17 @@
     return _toView.idEditing = null;
   });
 
-  _search$ = intent.search$.merge(_load$).map(function(status) {
-    var id, todo;
+  _sort$ = intent.sort$.map(function(sort) {
+    if (sort) {
+      _toView.sort = sort;
+    }
+    return null;
+  });
+
+  _search$ = Rx.Observable.merge(intent.search$, _load$, _sort$).map(function(status) {
+    var id, todo, todos;
     _toView.status = status = status || _toView.status;
-    return _visibleIds = (function() {
+    todos = (function() {
       var _results;
       _results = [];
       for (id in _todos) {
@@ -129,16 +139,18 @@
         if (status === 'open' && todo.close) {
           continue;
         }
-        if (status === 'star' && todo.status !== 'star') {
+        if (status === 'star' && !todo.star) {
           continue;
         }
         if (status === 'close' && !todo.close) {
           continue;
         }
-        _results.push(id);
+        _results.push(todo);
       }
       return _results;
     })();
+    todos = _.sortBy(todos, _toView.sort.split(','));
+    return _visibleIds = _.map(todos, '_id');
   });
 
 
@@ -156,10 +168,11 @@
 
   this.model = {
     exportTodo: function(todo) {
-      var closed, status;
+      var closed, priority, status;
       closed = todo.close ? "x " + todo.close + " " : "";
-      status = todo.status ? "status:" + todo.status + " " : "";
-      return "" + closed + todo.open + " " + status + todo.name;
+      status = todo.deleted ? "status:delete " : "";
+      priority = todo.star ? "(A) " : "";
+      return "" + closed + priority + todo.open + " " + status + todo.name;
     },
     todos$: Rx.Observable.merge(_create$, _star$, _close$, _delete$, _search$, _export$, _edit$, _update$).map(function() {
       _toView.todos = _visibleIds.map(function(id) {

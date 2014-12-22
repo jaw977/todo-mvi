@@ -4,7 +4,7 @@
 
   view = this.view = {};
 
-  _ref = ['create$', 'star$', 'close$', 'delete$', 'editName$', 'editOpen$', 'updateName$', 'updateOpen$', 'search$', 'purge$', 'export$'];
+  _ref = ['create$', 'star$', 'close$', 'delete$', 'editName$', 'editOpen$', 'updateName$', 'updateOpen$', 'search$', 'purge$', 'export$', 'sort$'];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     stream = _ref[_i];
     view[stream] = new Rx.Subject();
@@ -26,13 +26,14 @@
   });
 
   _render = function(ev) {
-    var color, event, h, heading, isDeleted, mark, todo;
+    var color, event, h, heading, mark, today, todo;
     h = _htmlTag;
     event = function(stream) {
       return function(ev) {
         return view[stream].onNext(ev);
       };
     };
+    today = util.date.today();
     return h.div({}, h.button({
       type: 'button',
       onclick: event('export$')
@@ -52,7 +53,15 @@
       value: 'close'
     }, 'Closed'), h.option({
       value: 'all'
-    }, 'All')), h.br(), h.br(), h.table({}, h.tr({}, (function() {
+    }, 'All')), h.select({
+      onchange: event('sort$')
+    }, h.option({
+      value: 'star,open,name'
+    }, 'Starred First, then opened earliest first'), h.option({
+      value: 'star,name'
+    }, 'Starred First'), h.option({
+      value: 'close,name'
+    }, 'Closed earliest first')), h.br(), h.br(), h.table({}, h.tr({}, (function() {
       var _j, _len1, _ref1, _results;
       _ref1 = ['ID', 'Status', 'Open', 'Description'];
       _results = [];
@@ -68,7 +77,8 @@
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         todo = _ref1[_j];
         _results.push(h.tr({
-          id: todo._id
+          id: todo._id,
+          style: (todo.open > today ? "color:silver" : "color:black")
         }, h.td(todo.order.toString()), h.td({}, h.button({
           type: 'button',
           value: todo._id,
@@ -87,9 +97,9 @@
           onkeydown: event('updateOpen$')
         })) : h.td({
           ondblclick: event('editOpen$')
-        }, util.date.format(todo.open)), h.td({}, todo.close ? (isDeleted = todo.status === 'delete', color = isDeleted ? "red" : "green", mark = isDeleted ? "×" : "✓", h.span({
+        }, util.date.format(todo.open)), h.td({}, todo.close ? (color = todo.deleted ? "red" : "green", mark = todo.deleted ? "×" : "✓", h.span({
           style: "color:" + color
-        }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : todo.status === 'star' ? h.span({
+        }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : todo.star ? h.span({
           style: "color:blue"
         }, "★ ") : "", ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.input({
           size: 50,

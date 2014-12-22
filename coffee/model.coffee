@@ -1,7 +1,7 @@
 ## Dependencies: Rx, _(lodash), PouchDB, util, intent
 ## Exports: model
 
-_toView = status: 'open'
+_toView = status: 'open', sort:'star,open,name'
 _todos = {}
 _visibleIds = []
 _db = new PouchDB 'todo-mvi'
@@ -34,23 +34,25 @@ _create$ = intent.create$.map (name) ->
 _star$ = intent.star$.map (id) ->
   todo = _todos[id]
   if not todo.close
-    todo.status = if todo.status == 'star' then '' else 'star'
+    todo.star = not todo.star
     _putTodo todo
 
 _close$ = intent.close$.map (id) ->
   todo = _todos[id]
   todo.close = if todo.close then false else util.date.today()
-  delete todo.status
+  delete todo.star
+  delete todo.deleted
   _putTodo todo
 
 _delete$ = intent.delete$.map (id) ->
   todo = _todos[id]
   if todo.close
     todo.close = false
-    delete todo.status
+    delete todo.star
+    delete todo.deleted
   else
     todo.close = util.date.today()
-    todo.status = "delete"
+    todo.deleted = true
   _putTodo todo
 
 _editName$ = intent.editName$.map (id) -> ['name', id]
@@ -70,15 +72,20 @@ _update$ = Rx.Observable.merge _updateName$, _updateOpen$
       _putTodo todo
     _toView.idEditing = null
 
-_search$ = intent.search$
-  .merge _load$
+_sort$ = intent.sort$.map (sort) ->
+  _toView.sort = sort if sort
+  null
+
+_search$ = Rx.Observable.merge intent.search$, _load$, _sort$
   .map (status) ->
     _toView.status = status = status or _toView.status
-    _visibleIds = for id, todo of _todos
+    todos = for id, todo of _todos
       continue if status == 'open' and todo.close
-      continue if status == 'star' and todo.status != 'star'
+      continue if status == 'star' and not todo.star
       continue if status == 'close' and not todo.close
-      id
+      todo
+    todos = _.sortBy todos, _toView.sort.split ','
+    _visibleIds = _.map todos, '_id'
 
 ###
 _purge$ = intent.purge$.map ->
@@ -94,8 +101,9 @@ _export$ = intent.export$.map -> _toView.showExport = not _toView.showExport
   
   exportTodo: (todo) ->
     closed = if todo.close then "x #{todo.close} " else ""
-    status = if todo.status then "status:#{todo.status} " else ""
-    "#{closed}#{todo.open} #{status}#{todo.name}"
+    status = if todo.deleted then "status:delete " else ""
+    priority = if todo.star then "(A) " else ""
+    "#{closed}#{priority}#{todo.open} #{status}#{todo.name}"
     
   todos$:
     Rx.Observable.merge _create$, _star$, _close$, _delete$, _search$, _export$, _edit$, _update$
