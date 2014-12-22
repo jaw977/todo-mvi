@@ -34,7 +34,10 @@ _create$ = intent.create$.map (name) ->
 _star$ = intent.star$.map (id) ->
   todo = _todos[id]
   if not todo.close
-    todo.star = not todo.star
+    if todo.star
+      delete todo.star
+    else
+      todo.star = true
     _putTodo todo
 
 _close$ = intent.close$.map (id) ->

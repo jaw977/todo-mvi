@@ -59,7 +59,11 @@
     var todo;
     todo = _todos[id];
     if (!todo.close) {
-      todo.star = !todo.star;
+      if (todo.star) {
+        delete todo.star;
+      } else {
+        todo.star = true;
+      }
       return _putTodo(todo);
     }
   });
