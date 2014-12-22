@@ -4,7 +4,7 @@
 
   view = this.view = {};
 
-  _ref = ['create$', 'star$', 'close$', 'delete$', 'editName$', 'updateName$', 'search$', 'purge$', 'export$'];
+  _ref = ['create$', 'star$', 'close$', 'delete$', 'editName$', 'editOpen$', 'updateName$', 'updateOpen$', 'search$', 'purge$', 'export$'];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     stream = _ref[_i];
     view[stream] = new Rx.Subject();
@@ -81,11 +81,17 @@
           type: 'button',
           value: todo._id,
           onclick: event('delete$')
-        }, "×")), h.td(util.date.format(todo.open)), h.td({}, todo.close ? (isDeleted = todo.status === 'delete', color = isDeleted ? "red" : "green", mark = isDeleted ? "×" : "✓", h.span({
+        }, "×")), ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
+          size: 8,
+          value: todo.open,
+          onkeydown: event('updateOpen$')
+        })) : h.td({
+          ondblclick: event('editOpen$')
+        }, util.date.format(todo.open)), h.td({}, todo.close ? (isDeleted = todo.status === 'delete', color = isDeleted ? "red" : "green", mark = isDeleted ? "×" : "✓", h.span({
           style: "color:" + color
         }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : todo.status === 'star' ? h.span({
           style: "color:blue"
-        }, "★ ") : "", ev.idEditing === todo._id ? h.input({
+        }, "★ ") : "", ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.input({
           size: 50,
           value: todo.name,
           onkeydown: event('updateName$')

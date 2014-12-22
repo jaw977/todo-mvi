@@ -1,5 +1,5 @@
 (function() {
-  var intent, stream, _i, _j, _len, _len1, _ref, _ref1;
+  var intent, stream, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
 
   intent = this.intent = {};
 
@@ -30,10 +30,18 @@
     return ev.target.parentNode.parentNode.id;
   });
 
-  intent.updateName$ = view.updateName$.filter(function(ev) {
-    return ev.key === 'Enter';
-  }).map(function(ev) {
-    return ev.target.value;
+  intent.editOpen$ = view.editOpen$.map(function(ev) {
+    return ev.target.parentNode.id;
   });
+
+  _ref2 = ['updateName$', 'updateOpen$'];
+  for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+    stream = _ref2[_k];
+    intent[stream] = view[stream].filter(function(ev) {
+      return ev.key === 'Enter';
+    }).map(function(ev) {
+      return ev.target.value;
+    });
+  }
 
 }).call(this);

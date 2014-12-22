@@ -3,7 +3,7 @@
 
 view = @view = {}
 
-for stream in ['create$','star$','close$','delete$','editName$','updateName$','search$','purge$','export$']
+for stream in ['create$','star$','close$','delete$','editName$','editOpen$','updateName$','updateOpen$','search$','purge$','export$']
   view[stream] = new Rx.Subject()
 
 _htmlTag = (tag, children...) ->
@@ -45,7 +45,10 @@ _render = (ev) ->
             h.button type: 'button', value: todo._id, onclick: event('star$'), "★"
             h.button type: 'button', value: todo._id, onclick: event('close$'), "✓"
             h.button type: 'button', value: todo._id, onclick: event('delete$'), "×"
-          h.td util.date.format todo.open
+          if ev.idEditing == todo._id and ev.fieldEditing == 'open'
+            h.td h.input size: 8, value: todo.open, onkeydown: event('updateOpen$')
+          else
+            h.td ondblclick: event('editOpen$'), util.date.format todo.open
           h.td {},
             if todo.close
               isDeleted = todo.status == 'delete'
@@ -55,7 +58,7 @@ _render = (ev) ->
             else if todo.status == 'star'
               h.span style: "color:blue", "★ "
             else ""
-            if ev.idEditing == todo._id
+            if ev.idEditing == todo._id and ev.fieldEditing == 'name'
               h.input size: 50, value: todo.name, onkeydown: event('updateName$')
             else
               h.span ondblclick: event('editName$'), todo.name

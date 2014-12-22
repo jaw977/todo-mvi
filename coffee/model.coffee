@@ -53,14 +53,22 @@ _delete$ = intent.delete$.map (id) ->
     todo.status = "delete"
   _putTodo todo
 
-_editName$ = intent.editName$.map (id) -> _toView.idEditing = id
+_editName$ = intent.editName$.map (id) -> ['name', id]
+_editOpen$ = intent.editOpen$.map (id) -> ['open', id]
+_edit$ = Rx.Observable.merge _editName$, _editOpen$
+  .map ([field,id]) ->
+    _toView.idEditing = id
+    _toView.fieldEditing = field
 
-_updateName$ = intent.updateName$.map (name) ->
-  todo = _todos[_toView.idEditing]
-  if todo.name != name
-    todo.name = name
-    _putTodo todo
-  _toView.idEditing = null
+_updateName$ = intent.updateName$.map (name) -> ['name',name]
+_updateOpen$ = intent.updateOpen$.map (open) -> ['open',open]
+_update$ = Rx.Observable.merge _updateName$, _updateOpen$
+  .map ([field,value]) ->
+    todo = _todos[_toView.idEditing]
+    if todo[field] != value
+      todo[field] = value
+      _putTodo todo
+    _toView.idEditing = null
 
 _search$ = intent.search$
   .merge _load$
@@ -90,7 +98,7 @@ _export$ = intent.export$.map -> _toView.showExport = not _toView.showExport
     "#{closed}#{todo.open} #{status}#{todo.name}"
     
   todos$:
-    Rx.Observable.merge _create$, _star$, _close$, _delete$, _search$, _export$, _editName$, _updateName$
+    Rx.Observable.merge _create$, _star$, _close$, _delete$, _search$, _export$, _edit$, _update$
       .map ->
         _toView.todos = _visibleIds.map (id) -> _todos[id]
         _toView

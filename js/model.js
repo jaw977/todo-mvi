@@ -1,5 +1,5 @@
 (function() {
-  var _close$, _create$, _db, _delete$, _editName$, _export$, _load$, _nextOrder, _putTodo, _search$, _star$, _toView, _todos, _updateName$, _visibleIds;
+  var _close$, _create$, _db, _delete$, _edit$, _editName$, _editOpen$, _export$, _load$, _nextOrder, _putTodo, _search$, _star$, _toView, _todos, _update$, _updateName$, _updateOpen$, _visibleIds;
 
   _toView = {
     status: 'open'
@@ -85,14 +85,34 @@
   });
 
   _editName$ = intent.editName$.map(function(id) {
-    return _toView.idEditing = id;
+    return ['name', id];
+  });
+
+  _editOpen$ = intent.editOpen$.map(function(id) {
+    return ['open', id];
+  });
+
+  _edit$ = Rx.Observable.merge(_editName$, _editOpen$).map(function(_arg) {
+    var field, id;
+    field = _arg[0], id = _arg[1];
+    _toView.idEditing = id;
+    return _toView.fieldEditing = field;
   });
 
   _updateName$ = intent.updateName$.map(function(name) {
-    var todo;
+    return ['name', name];
+  });
+
+  _updateOpen$ = intent.updateOpen$.map(function(open) {
+    return ['open', open];
+  });
+
+  _update$ = Rx.Observable.merge(_updateName$, _updateOpen$).map(function(_arg) {
+    var field, todo, value;
+    field = _arg[0], value = _arg[1];
     todo = _todos[_toView.idEditing];
-    if (todo.name !== name) {
-      todo.name = name;
+    if (todo[field] !== value) {
+      todo[field] = value;
       _putTodo(todo);
     }
     return _toView.idEditing = null;
@@ -141,7 +161,7 @@
       status = todo.status ? "status:" + todo.status + " " : "";
       return "" + closed + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(_create$, _star$, _close$, _delete$, _search$, _export$, _editName$, _updateName$).map(function() {
+    todos$: Rx.Observable.merge(_create$, _star$, _close$, _delete$, _search$, _export$, _edit$, _update$).map(function() {
       _toView.todos = _visibleIds.map(function(id) {
         return _todos[id];
       });

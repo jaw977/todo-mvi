@@ -18,6 +18,9 @@ intent.create$ = view.create$
 
 intent.editName$ = view.editName$.map (ev) -> ev.target.parentNode.parentNode.id
 
-intent.updateName$ = view.updateName$
-  .filter (ev) -> ev.key == 'Enter'
-  .map (ev) -> ev.target.value
+intent.editOpen$ = view.editOpen$.map (ev) -> ev.target.parentNode.id
+
+for stream in ['updateName$','updateOpen$']
+  intent[stream] = view[stream]
+    .filter (ev) -> ev.key == 'Enter'
+    .map (ev) -> ev.target.value

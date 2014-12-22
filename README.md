@@ -13,7 +13,9 @@ Plan:
   - Select All or Open (default) or Starred or Closed
   - Open date range, close date range 
   - Name 
-- Edit Open Date, Close / Delete Date (Date Picker)
+- DONE Edit Open Date, 
+- Edit Close Date
+- Use Date Picker to edit
 - PouchDB: View to select only open todos, Sync to CouchDB
 - Import from todo.txt
 - Improve appearence / CSS
