@@ -41,15 +41,12 @@ _render = (ev) ->
     h.br()
     h.table {},
       h.tr {}, 
-        for heading in ['ID','Status','Open','Description']
+        for heading in ['ID','Open','Status','Description']
           h.th heading
       for todo in ev.todos
-        h.tr id: todo._id, style: (if todo.open > today then "color:silver" else "color:black"),
+        rowColor = if todo.open <= today or todo.star then "black" else "silver"
+        h.tr id: todo._id, style: "color:#{rowColor}",
           h.td todo.order.toString()
-          h.td {},
-            h.button type: 'button', value: todo._id, onclick: event('star$'), "★"
-            h.button type: 'button', value: todo._id, onclick: event('close$'), "✓"
-            h.button type: 'button', value: todo._id, onclick: event('delete$'), "×"
           if ev.idEditing == todo._id and ev.fieldEditing == 'open'
             h.td h.input size: 8, value: todo.open, onkeydown: event('updateOpen$')
           else
@@ -58,14 +55,17 @@ _render = (ev) ->
             if todo.close
               color = if todo.deleted then "red" else "green"
               mark = if todo.deleted then "×" else "✓"
-              h.span style: "color:#{color}", "#{mark} #{util.date.format todo.close} "
-            else if todo.star
-              h.span style: "color:blue", "★ "
-            else ""
-            if ev.idEditing == todo._id and ev.fieldEditing == 'name'
-              h.input size: 50, value: todo.name, onkeydown: event('updateName$')
-            else
-              h.span ondblclick: event('editName$'), todo.name
+              h.span style: "color:#{color}; cursor:pointer", onclick: event('close$'), "#{mark} #{util.date.format todo.close} "
+            else 
+              color = if todo.star then "orange" else "silver"
+              mark = if todo.star then "★" else "☆"
+              [ h.span style: "color:silver; cursor:pointer", onclick: event('close$'), "✓ "
+                h.span style: "color:silver; cursor:pointer", onclick: event('delete$'), "× "
+                h.span style: "color:#{color}; cursor:pointer", onclick: event('star$'), "#{mark} " ]
+          if ev.idEditing == todo._id and ev.fieldEditing == 'name'
+            h.td h.input size: 50, value: todo.name, onkeydown: event('updateName$')
+          else
+            h.td style: "color:#{rowColor}", ondblclick: event('editName$'), todo.name
             
 _oldTree = null
 _rootNode = null

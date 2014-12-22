@@ -26,7 +26,7 @@
   });
 
   _render = function(ev) {
-    var color, event, h, heading, mark, today, todo;
+    var color, event, h, heading, mark, rowColor, today, todo;
     h = _htmlTag;
     event = function(stream) {
       return function(ev) {
@@ -63,7 +63,7 @@
       value: 'close,name'
     }, 'Closed earliest first')), h.br(), h.br(), h.table({}, h.tr({}, (function() {
       var _j, _len1, _ref1, _results;
-      _ref1 = ['ID', 'Status', 'Open', 'Description'];
+      _ref1 = ['ID', 'Open', 'Status', 'Description'];
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         heading = _ref1[_j];
@@ -76,38 +76,38 @@
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         todo = _ref1[_j];
+        rowColor = todo.open <= today || todo.star ? "black" : "silver";
         _results.push(h.tr({
           id: todo._id,
-          style: (todo.open > today ? "color:silver" : "color:black")
-        }, h.td(todo.order.toString()), h.td({}, h.button({
-          type: 'button',
-          value: todo._id,
-          onclick: event('star$')
-        }, "★"), h.button({
-          type: 'button',
-          value: todo._id,
-          onclick: event('close$')
-        }, "✓"), h.button({
-          type: 'button',
-          value: todo._id,
-          onclick: event('delete$')
-        }, "×")), ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
+          style: "color:" + rowColor
+        }, h.td(todo.order.toString()), ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
           size: 8,
           value: todo.open,
           onkeydown: event('updateOpen$')
         })) : h.td({
           ondblclick: event('editOpen$')
         }, util.date.format(todo.open)), h.td({}, todo.close ? (color = todo.deleted ? "red" : "green", mark = todo.deleted ? "×" : "✓", h.span({
-          style: "color:" + color
-        }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : todo.star ? h.span({
-          style: "color:blue"
-        }, "★ ") : "", ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.input({
+          style: "color:" + color + "; cursor:pointer",
+          onclick: event('close$')
+        }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : (color = todo.star ? "orange" : "silver", mark = todo.star ? "★" : "☆", [
+          h.span({
+            style: "color:silver; cursor:pointer",
+            onclick: event('close$')
+          }, "✓ "), h.span({
+            style: "color:silver; cursor:pointer",
+            onclick: event('delete$')
+          }, "× "), h.span({
+            style: "color:" + color + "; cursor:pointer",
+            onclick: event('star$')
+          }, "" + mark + " ")
+        ])), ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.td(h.input({
           size: 50,
           value: todo.name,
           onkeydown: event('updateName$')
-        }) : h.span({
+        })) : h.td({
+          style: "color:" + rowColor,
           ondblclick: event('editName$')
-        }, todo.name))));
+        }, todo.name)));
       }
       return _results;
     })()));

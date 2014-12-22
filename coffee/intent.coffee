@@ -3,7 +3,7 @@
 
 intent = @intent = {}
 
-for stream in ['star$','close$','delete$','search$','sort$']
+for stream in ['close$','delete$','search$','sort$']
   intent[stream] = view[stream].map (ev) -> ev.target.value
 
 for stream in ['purge$','export$']
@@ -16,9 +16,11 @@ intent.create$ = view.create$
     name
   .filter (name) -> name.length
 
-intent.editName$ = view.editName$.map (ev) -> ev.target.parentNode.parentNode.id
+for stream in ['star$','close$','delete$']
+  intent[stream] = view[stream].map (ev) -> ev.target.parentNode.parentNode.id
 
-intent.editOpen$ = view.editOpen$.map (ev) -> ev.target.parentNode.id
+for stream in ['editName$','editOpen$']
+  intent[stream] = view[stream].map (ev) -> ev.target.parentNode.id
 
 for stream in ['updateName$','updateOpen$']
   intent[stream] = view[stream]
