@@ -1,17 +1,27 @@
 gulp = require 'gulp'
 coffee = require 'gulp-coffee'
+stylus = require 'gulp-stylus'
 plumber = require 'gulp-plumber'
-coffeePath = './coffee/*.coffee'
+path =
+  coffee: './coffee/*.coffee'
+  stylus: './stylus/*.styl'
 
 gulp.task 'coffee', ->
-  gulp.src coffeePath
+  gulp.src path.coffee
     .pipe plumber()
     .pipe coffee()
     .pipe gulp.dest './js'
 
-gulp.task 'watch', ->
-  gulp.watch coffeePath, ['coffee']
+gulp.task 'stylus', ->
+  gulp.src path.stylus
+    .pipe plumber()
+    .pipe stylus()
+    .pipe gulp.dest './css'
 
-gulp.task 'default', ['coffee','watch'], ->
+gulp.task 'watch', ->
+  gulp.watch path.coffee, ['coffee']
+  gulp.watch path.stylus, ['stylus']
+
+gulp.task 'default', ['coffee','stylus','watch'], ->
 
     

@@ -20,7 +20,7 @@
     return VDOM.h(tag, attrs, _.flatten(children, true));
   };
 
-  ['div', 'span', 'button', 'br', 'input', 'textarea', 'select', 'option', 'table', 'tr', 'th', 'td'].forEach(function(tag) {
+  ['div', 'span', 'button', 'br', 'input', 'textarea', 'select', 'option', 'table', 'tr', 'th', 'td', 'p'].forEach(function(tag) {
     return _htmlTag[tag] = function() {
       var children;
       children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -32,10 +32,7 @@
     var color, h, heading, mark, rowColor, today, todo;
     h = _htmlTag;
     today = util.date.today();
-    return h.div({}, h.button({
-      type: 'button',
-      onclick: _event.export$
-    }, 'Export'), ev.showExport ? h.textarea(ev.todos.map(model.exportTodo).join("\n")) : void 0, h.br(), "Add Todo: ", h.input({
+    return h.div({}, "Add Todo: ", h.input({
       size: 50,
       onchange: _event.create$
     }), h.br(), h.button({
@@ -59,13 +56,19 @@
       value: 'star,name'
     }, 'Starred First'), h.option({
       value: 'close,name'
-    }, 'Closed earliest first')), h.br(), h.br(), h.table({}, h.tr({}, (function() {
+    }, 'Closed earliest first')), h.button({
+      type: 'button',
+      onclick: _event.export$
+    }, 'Export to todo.txt'), ev.showExport ? h.p(h.textarea({
+      rows: 10,
+      cols: 80
+    }, ev.todos.map(model.exportTodo).join("\n"))) : void 0, h.br(), h.br(), h.table({}, h.tr({}, (function() {
       var _i, _len, _ref, _results;
-      _ref = ['ID', 'Open', 'Status', 'Description'];
+      _ref = ['Open', 'Status', 'Description'];
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         heading = _ref[_i];
-        _results.push(h.th(heading));
+        _results.push(h.th(" " + heading + " "));
       }
       return _results;
     })()), (function() {
@@ -78,7 +81,7 @@
         _results.push(h.tr({
           id: todo._id,
           style: "color:" + rowColor
-        }, h.td(todo.order.toString()), ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
+        }, ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
           size: 8,
           value: todo.open,
           onkeydown: _event.updateOpen$

@@ -3,8 +3,9 @@ Plan:
 - DONE Create Git Repo: index.html, gulpfile, coffee, js
 - DONE Document structure: name=String, open=YYYY-MM-DD, close=YYYY-MM-DD, star=bool, deleted=bool, order=number
 - Actions: 
-  - Open: Star, Close, Delete
-  - Close: Unclose, Recur
+  - DONE Open: Star, Close, Delete
+  - DONE Close: Unclose, 
+  - Recur
   - Automatic Recur when closed and recur:+3d key
   - Multi-update
   - Purge
@@ -25,6 +26,7 @@ Plan:
 - Put on GitHub
 - Use Immutable.js
 - DONE View - allow h.option instead of h 'option'
+- package.json for gulp & plugins
 
 Notes:
 

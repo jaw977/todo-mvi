@@ -11,7 +11,7 @@ _event = {}
 _htmlTag = (tag, children...) ->
   attrs = if children.length and _.isPlainObject children[0] then children.shift() else {}
   VDOM.h tag, attrs, _.flatten children, true
-['div','span','button','br','input','textarea','select','option','table','tr','th','td'].forEach (tag) ->
+['div','span','button','br','input','textarea','select','option','table','tr','th','td','p'].forEach (tag) ->
   _htmlTag[tag] = (children...) -> _htmlTag tag, children...
 
 _render = (ev) ->
@@ -20,9 +20,6 @@ _render = (ev) ->
   today = util.date.today()
 
   h.div {},
-    h.button type: 'button', onclick: _event.export$, 'Export'
-    if ev.showExport then h.textarea ev.todos.map(model.exportTodo).join "\n"
-    h.br()
     "Add Todo: "
     h.input size: 50, onchange: _event.create$
     h.br()
@@ -38,16 +35,17 @@ _render = (ev) ->
       h.option value: 'star,open,name', 'Starred First, then opened earliest first'
       h.option value: 'star,name', 'Starred First'
       h.option value: 'close,name', 'Closed earliest first'
+    h.button type: 'button', onclick: _event.export$, 'Export to todo.txt'
+    if ev.showExport then h.p h.textarea rows: 10, cols: 80, ev.todos.map(model.exportTodo).join "\n"
     h.br()
     h.br()
     h.table {},
       h.tr {}, 
-        for heading in ['ID','Open','Status','Description']
-          h.th heading
+        for heading in ['Open','Status','Description']
+          h.th " #{heading} "
       for todo in ev.todos
         rowColor = if todo.open <= today or todo.star then "black" else "silver"
         h.tr id: todo._id, style: "color:#{rowColor}",
-          h.td todo.order.toString()
           if ev.idEditing == todo._id and ev.fieldEditing == 'open'
             h.td h.input size: 8, value: todo.open, onkeydown: _event.updateOpen$
           else
