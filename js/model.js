@@ -48,7 +48,7 @@
       _id: id,
       name: name,
       order: _nextOrder++,
-      open: util.date.today()
+      open: util.date.format()
     };
     _todos[id] = todo;
     _putTodo(todo);
@@ -71,7 +71,7 @@
   _close$ = intent.close$.map(function(id) {
     var todo;
     todo = _todos[id];
-    todo.close = todo.close ? false : util.date.today();
+    todo.close = todo.close ? false : util.date.format();
     delete todo.star;
     delete todo.deleted;
     return _putTodo(todo);
@@ -85,7 +85,7 @@
       delete todo.star;
       delete todo.deleted;
     } else {
-      todo.close = util.date.today();
+      todo.close = util.date.format();
       todo.deleted = true;
     }
     return _putTodo(todo);

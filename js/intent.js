@@ -42,7 +42,7 @@
     });
   }
 
-  _ref4 = ['updateName$', 'updateOpen$'];
+  _ref4 = ['updateName$'];
   for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
     stream = _ref4[_m];
     intent[stream] = view[stream].filter(function(ev) {
@@ -51,5 +51,9 @@
       return ev.target.value;
     });
   }
+
+  intent.updateOpen$ = view.updateOpen$.map(function(date) {
+    return util.date.format(date);
+  });
 
 }).call(this);

@@ -4,6 +4,6 @@
 @util =
   init$: new Rx.Subject()
   date:
-    today: -> moment().format "YYYY-MM-DD"
-    format: (date) -> if date then "#{date[5..6]}/#{date[8..9]}" else ""
+    format: (date) -> moment(date).format "YYYY-MM-DD"
+    short: (date) -> moment(date).format "MM/DD"
       

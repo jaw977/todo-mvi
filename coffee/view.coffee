@@ -17,7 +17,7 @@ _htmlTag = (tag, children...) ->
 _render = (ev) ->
   #console.log ev
   h = _htmlTag
-  today = util.date.today()
+  today = util.date.format()
 
   h.div {},
     "Add Todo: "
@@ -47,14 +47,14 @@ _render = (ev) ->
         rowColor = if todo.open <= today or todo.star then "black" else "silver"
         h.tr id: todo._id, style: "color:#{rowColor}",
           if ev.idEditing == todo._id and ev.fieldEditing == 'open'
-            h.td h.input size: 8, value: todo.open, onkeydown: _event.updateOpen$
+            h.td h.input size: 8, value: todo.open, id:'datepicker'#, onchange: _event.updateOpen$ #onkeydown: _event.updateOpen$
           else
-            h.td ondblclick: _event.editOpen$, util.date.format todo.open
+            h.td ondblclick: _event.editOpen$, util.date.short todo.open
           h.td {},
             if todo.close
               color = if todo.deleted then "red" else "green"
               mark = if todo.deleted then "×" else "✓"
-              h.span style: "color:#{color}; cursor:pointer", onclick: _event.close$, "#{mark} #{util.date.format todo.close} "
+              h.span style: "color:#{color}; cursor:pointer", onclick: _event.close$, "#{mark} #{util.date.short todo.close} "
             else 
               color = if todo.star then "orange" else "silver"
               mark = if todo.star then "★" else "☆"
@@ -68,6 +68,7 @@ _render = (ev) ->
             
 _oldTree = null
 _rootNode = null
+_pikaday = null
 
 util.init$.subscribe (ev) ->
   return unless ev == 'model'
@@ -79,4 +80,13 @@ util.init$.subscribe (ev) ->
       _rootNode = VDOM.createElement newTree
       document.body.appendChild _rootNode
     _oldTree = newTree
+
+    datepicker = document.getElementById 'datepicker'
+    if datepicker
+      if not _pikaday
+        _pikaday = new Pikaday field: datepicker, onSelect: _event.updateOpen$
+        _pikaday.show()
+    else if _pikaday
+      _pikaday.destroy()
+      _pikaday = null
     

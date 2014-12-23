@@ -1,4 +1,4 @@
-## Dependencies: view
+## Dependencies: util, view
 ## Exports: intent
 
 intent = @intent = {}
@@ -22,7 +22,9 @@ for stream in ['star$','close$','delete$']
 for stream in ['editName$','editOpen$']
   intent[stream] = view[stream].map (ev) -> ev.target.parentNode.id
 
-for stream in ['updateName$','updateOpen$']
+for stream in ['updateName$']
   intent[stream] = view[stream]
     .filter (ev) -> ev.key == 'Enter'
     .map (ev) -> ev.target.value
+
+intent.updateOpen$ = view.updateOpen$.map (date) -> util.date.format date

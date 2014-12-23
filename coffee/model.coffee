@@ -26,7 +26,7 @@ _create$ = intent.create$.map (name) ->
     _id: id
     name: name
     order: _nextOrder++
-    open: util.date.today()
+    open: util.date.format()
   _todos[id] = todo
   _putTodo todo
   _visibleIds.push id
@@ -42,7 +42,7 @@ _star$ = intent.star$.map (id) ->
 
 _close$ = intent.close$.map (id) ->
   todo = _todos[id]
-  todo.close = if todo.close then false else util.date.today()
+  todo.close = if todo.close then false else util.date.format()
   delete todo.star
   delete todo.deleted
   _putTodo todo
@@ -54,7 +54,7 @@ _delete$ = intent.delete$.map (id) ->
     delete todo.star
     delete todo.deleted
   else
-    todo.close = util.date.today()
+    todo.close = util.date.format()
     todo.deleted = true
   _putTodo todo
 

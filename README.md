@@ -11,15 +11,15 @@ Plan:
   - Purge
 - DONE Sort: When button pressed or dropdown changed.  Star + Open Date + Name; Star + Name; Close Date + Name
 - Filter: When button pressed or input changed
-  - Select All or Open (default) or Starred or Closed
+  - DONE Select All or Open (default) or Starred or Closed
   - Open date range, close date range 
   - Name 
 - DONE Edit Open Date, 
 - Edit Close Date
-- Use Date Picker to edit
+- DONE Use Date Picker to edit Open Date
 - PouchDB: View to select only open todos, Sync to CouchDB
 - Import from todo.txt
-- Improve appearence / CSS
+- DONE Improve appearence / CSS
 - Recognize / format todo.txt project, context
 - VDOM.js - remove dom delegator
 - Add Documentation - README.md - Coffee - MIT License - VDOM.js
@@ -27,6 +27,7 @@ Plan:
 - Use Immutable.js
 - DONE View - allow h.option instead of h 'option'
 - package.json for gulp & plugins
+- Write tests
 
 Notes:
 

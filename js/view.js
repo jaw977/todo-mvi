@@ -1,5 +1,5 @@
 (function() {
-  var view, _event, _htmlTag, _oldTree, _render, _rootNode,
+  var view, _event, _htmlTag, _oldTree, _pikaday, _render, _rootNode,
     __slice = [].slice;
 
   view = this.view = {};
@@ -31,7 +31,7 @@
   _render = function(ev) {
     var color, h, heading, mark, rowColor, today, todo;
     h = _htmlTag;
-    today = util.date.today();
+    today = util.date.format();
     return h.div({}, "Add Todo: ", h.input({
       size: 50,
       onchange: _event.create$
@@ -84,13 +84,13 @@
         }, ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
           size: 8,
           value: todo.open,
-          onkeydown: _event.updateOpen$
+          id: 'datepicker'
         })) : h.td({
           ondblclick: _event.editOpen$
-        }, util.date.format(todo.open)), h.td({}, todo.close ? (color = todo.deleted ? "red" : "green", mark = todo.deleted ? "×" : "✓", h.span({
+        }, util.date.short(todo.open)), h.td({}, todo.close ? (color = todo.deleted ? "red" : "green", mark = todo.deleted ? "×" : "✓", h.span({
           style: "color:" + color + "; cursor:pointer",
           onclick: _event.close$
-        }, "" + mark + " " + (util.date.format(todo.close)) + " ")) : (color = todo.star ? "orange" : "silver", mark = todo.star ? "★" : "☆", [
+        }, "" + mark + " " + (util.date.short(todo.close)) + " ")) : (color = todo.star ? "orange" : "silver", mark = todo.star ? "★" : "☆", [
           h.span({
             style: "color:silver; cursor:pointer",
             onclick: _event.close$
@@ -118,12 +118,14 @@
 
   _rootNode = null;
 
+  _pikaday = null;
+
   util.init$.subscribe(function(ev) {
     if (ev !== 'model') {
       return;
     }
     return model.todos$.subscribe(function(ev) {
-      var newTree;
+      var datepicker, newTree;
       newTree = _render(ev);
       if (_oldTree) {
         _rootNode = VDOM.patch(_rootNode, VDOM.diff(_oldTree, newTree));
@@ -131,7 +133,20 @@
         _rootNode = VDOM.createElement(newTree);
         document.body.appendChild(_rootNode);
       }
-      return _oldTree = newTree;
+      _oldTree = newTree;
+      datepicker = document.getElementById('datepicker');
+      if (datepicker) {
+        if (!_pikaday) {
+          _pikaday = new Pikaday({
+            field: datepicker,
+            onSelect: _event.updateOpen$
+          });
+          return _pikaday.show();
+        }
+      } else if (_pikaday) {
+        _pikaday.destroy();
+        return _pikaday = null;
+      }
     });
   });
 
