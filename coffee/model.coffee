@@ -101,5 +101,3 @@ _export$ = intent.export$.map -> _toView.showExport = not _toView.showExport
       .map ->
         _toView.todos = _visibleIds.map (id) -> _todos[id]
         _toView
-
-util.init$.onNext "model"

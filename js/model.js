@@ -170,6 +170,4 @@
     })
   };
 
-  util.init$.onNext("model");
-
 }).call(this);
