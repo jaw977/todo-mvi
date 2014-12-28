@@ -24,7 +24,7 @@
   });
 
   _render = function(ev) {
-    var color, h, heading, mark, rowColor, today, todo;
+    var className, h, heading, mark, today, todo;
     h = _htmlTag;
     today = util.date.format();
     return h.div({}, "Add Todo: ", h.input({
@@ -72,28 +72,27 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         todo = _ref[_i];
-        rowColor = todo.open <= today || todo.star ? "black" : "silver";
         _results.push(h.tr({
           id: todo._id,
-          style: "color:" + rowColor
+          className: (todo.open <= today || todo.star ? "" : "future")
         }, ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
           size: 8,
           value: todo.open,
           id: 'datepicker'
         })) : h.td({
           ondblclick: _event.editOpen$
-        }, util.date.short(todo.open)), h.td({}, todo.close ? (color = todo.deleted ? "red" : "green", mark = todo.deleted ? "×" : "✓", h.span({
-          style: "color:" + color + "; cursor:pointer",
+        }, util.date.short(todo.open)), h.td({}, todo.close ? (className = todo.deleted ? "deleted" : "closed", mark = todo.deleted ? "×" : "✓", h.span({
+          className: className,
           onclick: _event.close$
-        }, "" + mark + " " + (util.date.short(todo.close)) + " ")) : (color = todo.star ? "orange" : "silver", mark = todo.star ? "★" : "☆", [
+        }, "" + mark + " " + (util.date.short(todo.close)) + " ")) : (className = todo.star ? "starred" : "off", mark = todo.star ? "★" : "☆", [
           h.span({
-            style: "color:silver; cursor:pointer",
+            className: "off",
             onclick: _event.close$
           }, "✓ "), h.span({
-            style: "color:silver; cursor:pointer",
+            className: "off",
             onclick: _event.delete$
           }, "× "), h.span({
-            style: "color:" + color + "; cursor:pointer",
+            className: className,
             onclick: _event.star$
           }, "" + mark + " ")
         ])), ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.td(h.input({
@@ -101,7 +100,6 @@
           value: todo.name,
           onkeydown: _event.updateName$
         })) : h.td({
-          style: "color:" + rowColor,
           ondblclick: _event.editName$
         }, todo.name)));
       }

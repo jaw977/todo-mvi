@@ -38,27 +38,26 @@ _render = (ev) ->
         for heading in ['Open','Status','Description']
           h.th " #{heading} "
       for todo in ev.todos
-        rowColor = if todo.open <= today or todo.star then "black" else "silver"
-        h.tr id: todo._id, style: "color:#{rowColor}",
+        h.tr id: todo._id, className: (if todo.open <= today or todo.star then "" else "future"),
           if ev.idEditing == todo._id and ev.fieldEditing == 'open'
             h.td h.input size: 8, value: todo.open, id:'datepicker'
           else
             h.td ondblclick: _event.editOpen$, util.date.short todo.open
           h.td {},
             if todo.close
-              color = if todo.deleted then "red" else "green"
+              className = if todo.deleted then "deleted" else "closed"
               mark = if todo.deleted then "×" else "✓"
-              h.span style: "color:#{color}; cursor:pointer", onclick: _event.close$, "#{mark} #{util.date.short todo.close} "
+              h.span className: className, onclick: _event.close$, "#{mark} #{util.date.short todo.close} "
             else 
-              color = if todo.star then "orange" else "silver"
+              className = if todo.star then "starred" else "off"
               mark = if todo.star then "★" else "☆"
-              [ h.span style: "color:silver; cursor:pointer", onclick: _event.close$, "✓ "
-                h.span style: "color:silver; cursor:pointer", onclick: _event.delete$, "× "
-                h.span style: "color:#{color}; cursor:pointer", onclick: _event.star$, "#{mark} " ]
+              [ h.span className: "off", onclick: _event.close$, "✓ "
+                h.span className: "off", onclick: _event.delete$, "× "
+                h.span className: className, onclick: _event.star$, "#{mark} " ]
           if ev.idEditing == todo._id and ev.fieldEditing == 'name'
             h.td h.input size: 50, value: todo.name, onkeydown: _event.updateName$
           else
-            h.td style: "color:#{rowColor}", ondblclick: _event.editName$, todo.name
+            h.td ondblclick: _event.editName$, todo.name
             
 _oldTree = null
 _rootNode = null

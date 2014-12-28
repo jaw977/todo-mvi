@@ -15,3 +15,22 @@ th {
   border-bottom: 1px solid #add8e6;
   padding: 3px;
 }
+tr.future td {
+  color: #c0c0c0;
+}
+.off {
+  color: #c0c0c0;
+  cursor: pointer;
+}
+.starred {
+  color: #ffa500;
+  cursor: pointer;
+}
+.closed {
+  color: #008000;
+  cursor: pointer;
+}
+.deleted {
+  color: #f00;
+  cursor: pointer;
+}
