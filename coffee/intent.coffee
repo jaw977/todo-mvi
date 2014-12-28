@@ -10,6 +10,7 @@ for stream in ['export$']
   intent[stream] = view[stream]
 
 intent.create$ = view.create$
+  .filter (ev) -> ev.keyCode == 13
   .map (ev) ->
     name = ev.target.value
     ev.target.value = ''
@@ -24,7 +25,7 @@ for stream in ['editName$','editOpen$']
 
 for stream in ['updateName$']
   intent[stream] = view[stream]
-    .filter (ev) -> ev.key == 'Enter'
+    .filter (ev) -> ev.keyCode == 13
     .map (ev) -> ev.target.value
 
 intent.updateOpen$ = view.updateOpen$.map (date) -> util.date.format date

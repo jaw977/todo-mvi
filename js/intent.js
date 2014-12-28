@@ -17,7 +17,9 @@
     intent[stream] = view[stream];
   }
 
-  intent.create$ = view.create$.map(function(ev) {
+  intent.create$ = view.create$.filter(function(ev) {
+    return ev.keyCode === 13;
+  }).map(function(ev) {
     var name;
     name = ev.target.value;
     ev.target.value = '';
@@ -46,7 +48,7 @@
   for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
     stream = _ref4[_m];
     intent[stream] = view[stream].filter(function(ev) {
-      return ev.key === 'Enter';
+      return ev.keyCode === 13;
     }).map(function(ev) {
       return ev.target.value;
     });

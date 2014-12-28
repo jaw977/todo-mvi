@@ -16,7 +16,7 @@ _render = (ev) ->
 
   h.div {},
     "Add Todo: "
-    h.input size: 50, onchange: _event.create$
+    h.input size: 50, onkeydown: _event.create$
     h.br()
     h.button type: 'button', onclick: _event.search$, 'Search'
     ' '

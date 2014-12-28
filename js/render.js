@@ -29,7 +29,7 @@
     today = util.date.format();
     return h.div({}, "Add Todo: ", h.input({
       size: 50,
-      onchange: _event.create$
+      onkeydown: _event.create$
     }), h.br(), h.button({
       type: 'button',
       onclick: _event.search$
