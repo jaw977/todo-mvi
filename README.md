@@ -2,6 +2,8 @@
 
 A test application I'm writing to learn functional reactive programming with javascript / coffeescript.
 
+[Run the application demo](http://rawgit.com/jaw977/todo-mvi/master/index.html)
+
 ## Design
 
 The design is based on [Model-View-Intent](http://futurice.com/blog/reactive-mvc-and-the-virtual-dom) by [André Staltz](https://github.com/staltz).  
