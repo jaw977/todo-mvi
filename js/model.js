@@ -1,5 +1,5 @@
 (function() {
-  var _close$, _create$, _db, _delete$, _edit$, _editName$, _editOpen$, _export$, _load$, _nextOrder, _putTodo, _search$, _sort$, _star$, _toView, _todos, _update$, _updateName$, _updateOpen$, _visibleIds;
+  var _close$, _create$, _db, _delete$, _edit$, _editName$, _editOpen$, _export$, _load$, _putTodo, _search$, _sort$, _star$, _toView, _todos, _update$, _updateName$, _updateOpen$, _visibleIds;
 
   _toView = {
     status: 'open',
@@ -11,8 +11,6 @@
   _visibleIds = [];
 
   _db = new PouchDB('todo-mvi');
-
-  _nextOrder = 0;
 
   _putTodo = function(todo) {
     return _db.put(todo, function(err, result) {
@@ -32,11 +30,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
         _todos[row.id] = row.doc;
-        if (row.doc.order > _nextOrder) {
-          _nextOrder = row.doc.order;
-        }
       }
-      _nextOrder++;
       return observer.onNext();
     });
   });
@@ -47,7 +41,6 @@
     todo = {
       _id: id,
       name: name,
-      order: _nextOrder++,
       open: util.date.format()
     };
     _todos[id] = todo;
@@ -156,15 +149,6 @@
     todos = _.sortBy(todos, _toView.sort.split(','));
     return _visibleIds = _.map(todos, '_id');
   });
-
-
-  /*
-  _purge$ = intent.purge$.map ->
-    for id, todo of _todos
-      continue unless _statusLabels[todo.status] == 'Deleted'
-      _db.remove todo
-      delete _todos[id]
-   */
 
   _export$ = intent.export$.map(function() {
     return _toView.showExport = !_toView.showExport;

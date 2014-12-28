@@ -6,7 +6,7 @@ intent = @intent = {}
 for stream in ['close$','delete$','search$','sort$']
   intent[stream] = view[stream].map (ev) -> ev.target.value
 
-for stream in ['purge$','export$']
+for stream in ['export$']
   intent[stream] = view[stream]
 
 intent.create$ = view.create$

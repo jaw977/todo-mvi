@@ -28,6 +28,7 @@ Plan:
 - DONE View - allow h.option instead of h 'option'
 - package.json for gulp & plugins
 - Write tests
+- Help button
 
 Notes:
 

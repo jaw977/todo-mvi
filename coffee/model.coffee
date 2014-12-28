@@ -5,7 +5,6 @@ _toView = status: 'open', sort:'star,open,name'
 _todos = {}
 _visibleIds = []
 _db = new PouchDB 'todo-mvi'
-_nextOrder = 0
 
 _putTodo = (todo) ->
   _db.put todo, (err, result) ->
@@ -16,8 +15,6 @@ _load$ = Rx.Observable.create (observer) ->
   _db.allDocs include_docs: true, (err, doc) ->
     for row in doc.rows
       _todos[row.id] = row.doc
-      _nextOrder = row.doc.order if row.doc.order > _nextOrder
-    _nextOrder++
     observer.onNext()
 
 _create$ = intent.create$.map (name) ->
@@ -25,7 +22,6 @@ _create$ = intent.create$.map (name) ->
   todo =
     _id: id
     name: name
-    order: _nextOrder++
     open: util.date.format()
   _todos[id] = todo
   _putTodo todo
@@ -89,14 +85,6 @@ _search$ = Rx.Observable.merge intent.search$, _load$, _sort$
       todo
     todos = _.sortBy todos, _toView.sort.split ','
     _visibleIds = _.map todos, '_id'
-
-###
-_purge$ = intent.purge$.map ->
-  for id, todo of _todos
-    continue unless _statusLabels[todo.status] == 'Deleted'
-    _db.remove todo
-    delete _todos[id]
-###
 
 _export$ = intent.export$.map -> _toView.showExport = not _toView.showExport
 

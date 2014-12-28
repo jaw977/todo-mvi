@@ -4,7 +4,7 @@
 view = @view = {}
 _event = {}
 
-['create$','star$','close$','delete$','editName$','editOpen$','updateName$','updateOpen$','search$','purge$','export$','sort$'].forEach (stream) ->
+['create$','star$','close$','delete$','editName$','editOpen$','updateName$','updateOpen$','search$','export$','sort$'].forEach (stream) ->
   view[stream] = new Rx.Subject()
   _event[stream] = (ev) -> view[stream].onNext ev
 
@@ -30,7 +30,6 @@ _render = (ev) ->
       h.option value: 'star', 'Starred'
       h.option value: 'close', 'Closed'
       h.option value: 'all', 'All'
-    #if ev.status and ev.status[0] == 3 then h 'button', type: 'button', onclick: event('purge$'), 'Purge Deleted'
     h.select onchange: _event.sort$,
       h.option value: 'star,open,name', 'Starred First, then opened earliest first'
       h.option value: 'star,name', 'Starred First'
@@ -47,7 +46,7 @@ _render = (ev) ->
         rowColor = if todo.open <= today or todo.star then "black" else "silver"
         h.tr id: todo._id, style: "color:#{rowColor}",
           if ev.idEditing == todo._id and ev.fieldEditing == 'open'
-            h.td h.input size: 8, value: todo.open, id:'datepicker'#, onchange: _event.updateOpen$ #onkeydown: _event.updateOpen$
+            h.td h.input size: 8, value: todo.open, id:'datepicker'
           else
             h.td ondblclick: _event.editOpen$, util.date.short todo.open
           h.td {},

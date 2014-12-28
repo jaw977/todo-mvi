@@ -6,7 +6,7 @@
 
   _event = {};
 
-  ['create$', 'star$', 'close$', 'delete$', 'editName$', 'editOpen$', 'updateName$', 'updateOpen$', 'search$', 'purge$', 'export$', 'sort$'].forEach(function(stream) {
+  ['create$', 'star$', 'close$', 'delete$', 'editName$', 'editOpen$', 'updateName$', 'updateOpen$', 'search$', 'export$', 'sort$'].forEach(function(stream) {
     view[stream] = new Rx.Subject();
     return _event[stream] = function(ev) {
       return view[stream].onNext(ev);

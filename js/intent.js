@@ -11,7 +11,7 @@
     });
   }
 
-  _ref1 = ['purge$', 'export$'];
+  _ref1 = ['export$'];
   for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
     stream = _ref1[_j];
     intent[stream] = view[stream];
