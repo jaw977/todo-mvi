@@ -1,19 +1,19 @@
 (function() {
-  var _close$, _create$, _db, _delete$, _edit$, _editName$, _editOpen$, _export$, _load$, _putTodo, _search$, _sort$, _star$, _toView, _todos, _update$, _updateName$, _updateOpen$, _visibleIds;
+  var close$, create$, delete$, edit$, editName$, editOpen$, export$, load$, pouchdb, putTodo, search$, sort$, star$, toView, todosObj, update$, updateName$, updateOpen$, visibleIds;
 
-  _toView = {
+  toView = {
     status: 'open',
     sort: 'star,open,name'
   };
 
-  _todos = {};
+  todosObj = {};
 
-  _visibleIds = [];
+  visibleIds = [];
 
-  _db = new PouchDB('todo-mvi');
+  pouchdb = new PouchDB('todo-mvi');
 
-  _putTodo = function(todo) {
-    return _db.put(todo, function(err, result) {
+  putTodo = function(todo) {
+    return pouchdb.put(todo, function(err, result) {
       if (err) {
         throw err;
       }
@@ -21,21 +21,21 @@
     });
   };
 
-  _load$ = Rx.Observable.create(function(observer) {
-    return _db.allDocs({
+  load$ = Rx.Observable.create(function(observer) {
+    return pouchdb.allDocs({
       include_docs: true
     }, function(err, doc) {
       var row, _i, _len, _ref;
       _ref = doc.rows;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
-        _todos[row.id] = row.doc;
+        todosObj[row.id] = row.doc;
       }
       return observer.onNext();
     });
   });
 
-  _create$ = intent.create$.map(function(name) {
+  create$ = intent.create.map(function(name) {
     var id, todo;
     id = new Date().toISOString();
     todo = {
@@ -43,36 +43,36 @@
       name: name,
       open: util.date.format()
     };
-    _todos[id] = todo;
-    _putTodo(todo);
-    return _visibleIds.push(id);
+    todosObj[id] = todo;
+    putTodo(todo);
+    return visibleIds.push(id);
   });
 
-  _star$ = intent.star$.map(function(id) {
+  star$ = intent.star.map(function(id) {
     var todo;
-    todo = _todos[id];
+    todo = todosObj[id];
     if (!todo.close) {
       if (todo.star) {
         delete todo.star;
       } else {
         todo.star = true;
       }
-      return _putTodo(todo);
+      return putTodo(todo);
     }
   });
 
-  _close$ = intent.close$.map(function(id) {
+  close$ = intent.close.map(function(id) {
     var todo;
-    todo = _todos[id];
+    todo = todosObj[id];
     todo.close = todo.close ? false : util.date.format();
     delete todo.star;
     delete todo.deleted;
-    return _putTodo(todo);
+    return putTodo(todo);
   });
 
-  _delete$ = intent.delete$.map(function(id) {
+  delete$ = intent.delete$.map(function(id) {
     var todo;
-    todo = _todos[id];
+    todo = todosObj[id];
     if (todo.close) {
       todo.close = false;
       delete todo.star;
@@ -81,58 +81,58 @@
       todo.close = util.date.format();
       todo.deleted = true;
     }
-    return _putTodo(todo);
+    return putTodo(todo);
   });
 
-  _editName$ = intent.editName$.map(function(id) {
+  editName$ = intent.editName.map(function(id) {
     return ['name', id];
   });
 
-  _editOpen$ = intent.editOpen$.map(function(id) {
+  editOpen$ = intent.editOpen.map(function(id) {
     return ['open', id];
   });
 
-  _edit$ = Rx.Observable.merge(_editName$, _editOpen$).map(function(_arg) {
+  edit$ = Rx.Observable.merge(editName$, editOpen$).map(function(_arg) {
     var field, id;
     field = _arg[0], id = _arg[1];
-    _toView.idEditing = id;
-    return _toView.fieldEditing = field;
+    toView.idEditing = id;
+    return toView.fieldEditing = field;
   });
 
-  _updateName$ = intent.updateName$.map(function(name) {
+  updateName$ = intent.updateName.map(function(name) {
     return ['name', name];
   });
 
-  _updateOpen$ = intent.updateOpen$.map(function(open) {
+  updateOpen$ = intent.updateOpen.map(function(open) {
     return ['open', open];
   });
 
-  _update$ = Rx.Observable.merge(_updateName$, _updateOpen$).map(function(_arg) {
+  update$ = Rx.Observable.merge(updateName$, updateOpen$).map(function(_arg) {
     var field, todo, value;
     field = _arg[0], value = _arg[1];
-    todo = _todos[_toView.idEditing];
+    todo = todosObj[toView.idEditing];
     if (todo[field] !== value) {
       todo[field] = value;
-      _putTodo(todo);
+      putTodo(todo);
     }
-    return _toView.idEditing = null;
+    return toView.idEditing = null;
   });
 
-  _sort$ = intent.sort$.map(function(sort) {
+  sort$ = intent.sort.map(function(sort) {
     if (sort) {
-      _toView.sort = sort;
+      toView.sort = sort;
     }
     return null;
   });
 
-  _search$ = Rx.Observable.merge(intent.search$, _load$, _sort$).map(function(status) {
+  search$ = Rx.Observable.merge(intent.search, load$, sort$).map(function(status) {
     var id, todo, todos;
-    _toView.status = status = status || _toView.status;
+    toView.status = status = status || toView.status;
     todos = (function() {
       var _results;
       _results = [];
-      for (id in _todos) {
-        todo = _todos[id];
+      for (id in todosObj) {
+        todo = todosObj[id];
         if (status === 'open' && todo.close) {
           continue;
         }
@@ -146,12 +146,12 @@
       }
       return _results;
     })();
-    todos = _.sortBy(todos, _toView.sort.split(','));
-    return _visibleIds = _.map(todos, '_id');
+    todos = _.sortBy(todos, toView.sort.split(','));
+    return visibleIds = _.map(todos, '_id');
   });
 
-  _export$ = intent.export$.map(function() {
-    return _toView.showExport = !_toView.showExport;
+  export$ = intent.export$.map(function() {
+    return toView.showExport = !toView.showExport;
   });
 
   this.model = {
@@ -162,11 +162,11 @@
       priority = todo.star ? "(A) " : "";
       return "" + closed + priority + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(_create$, _star$, _close$, _delete$, _search$, _export$, _edit$, _update$).map(function() {
-      _toView.todos = _visibleIds.map(function(id) {
-        return _todos[id];
+    todos$: Rx.Observable.merge(create$, star$, close$, delete$, search$, export$, edit$, update$).map(function() {
+      toView.todos = visibleIds.map(function(id) {
+        return todosObj[id];
       });
-      return _toView;
+      return toView;
     })
   };
 

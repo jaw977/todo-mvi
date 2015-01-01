@@ -1,14 +1,14 @@
 (function() {
-  var _event, _htmlTag, _oldTree, _pikaday, _render, _rootNode,
+  var emitEvent, htmlTag, oldTree, pikaday, render, rootNode,
     __slice = [].slice;
 
-  _event = _.transform(view, function(result, stream, name) {
+  emitEvent = _.transform(view, function(result, stream, name) {
     return result[name] = function(ev) {
       return stream.onNext(ev);
     };
   });
 
-  _htmlTag = function() {
+  htmlTag = function() {
     var attrs, children, tag;
     tag = arguments[0], children = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     attrs = children.length && _.isPlainObject(children[0]) ? children.shift() : {};
@@ -16,25 +16,26 @@
   };
 
   ['div', 'span', 'button', 'br', 'input', 'textarea', 'select', 'option', 'table', 'tr', 'th', 'td', 'p'].forEach(function(tag) {
-    return _htmlTag[tag] = function() {
+    return htmlTag[tag] = function() {
       var children;
       children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return _htmlTag.apply(null, [tag].concat(__slice.call(children)));
+      return htmlTag.apply(null, [tag].concat(__slice.call(children)));
     };
   });
 
-  _render = function(ev) {
-    var className, h, heading, mark, today, todo;
-    h = _htmlTag;
+  render = function(ev) {
+    var className, e, h, heading, mark, today, todo;
+    h = htmlTag;
+    e = emitEvent;
     today = util.date.format();
     return h.div({}, "Add Todo: ", h.input({
       size: 50,
-      onkeydown: _event.create$
+      onkeydown: e.create
     }), h.br(), h.button({
       type: 'button',
-      onclick: _event.search$
+      onclick: e.search
     }, 'Search'), ' ', h.select({
-      onchange: _event.search$
+      onchange: e.search
     }, h.option({
       value: 'open'
     }, 'Open'), h.option({
@@ -44,7 +45,7 @@
     }, 'Closed'), h.option({
       value: 'all'
     }, 'All')), h.select({
-      onchange: _event.sort$
+      onchange: e.sort
     }, h.option({
       value: 'star,open,name'
     }, 'Starred First, then opened earliest first'), h.option({
@@ -53,7 +54,7 @@
       value: 'close,name'
     }, 'Closed earliest first')), h.button({
       type: 'button',
-      onclick: _event.export$
+      onclick: e.export$
     }, 'Export to todo.txt'), ev.showExport ? h.p(h.textarea({
       rows: 10,
       cols: 80
@@ -80,61 +81,61 @@
           value: todo.open,
           id: 'datepicker'
         })) : h.td({
-          ondblclick: _event.editOpen$
+          ondblclick: e.editOpen
         }, util.date.short(todo.open)), h.td({}, todo.close ? (className = todo.deleted ? "deleted" : "closed", mark = todo.deleted ? "×" : "✓", h.span({
           className: className,
-          onclick: _event.close$
+          onclick: e.close
         }, "" + mark + " " + (util.date.short(todo.close)) + " ")) : (className = todo.star ? "starred" : "off", mark = todo.star ? "★" : "☆", [
           h.span({
             className: "off",
-            onclick: _event.close$
+            onclick: e.close
           }, "✓ "), h.span({
             className: "off",
-            onclick: _event.delete$
+            onclick: e.delete$
           }, "× "), h.span({
             className: className,
-            onclick: _event.star$
+            onclick: e.star
           }, "" + mark + " ")
         ])), ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.td(h.input({
           size: 50,
           value: todo.name,
-          onkeydown: _event.updateName$
+          onkeydown: e.updateName
         })) : h.td({
-          ondblclick: _event.editName$
+          ondblclick: e.editName
         }, todo.name)));
       }
       return _results;
     })()));
   };
 
-  _oldTree = null;
+  oldTree = null;
 
-  _rootNode = null;
+  rootNode = null;
 
-  _pikaday = null;
+  pikaday = null;
 
   model.todos$.subscribe(function(ev) {
     var datepicker, newTree;
-    newTree = _render(ev);
-    if (_oldTree) {
-      _rootNode = VDOM.patch(_rootNode, VDOM.diff(_oldTree, newTree));
+    newTree = render(ev);
+    if (oldTree) {
+      rootNode = VDOM.patch(rootNode, VDOM.diff(oldTree, newTree));
     } else {
-      _rootNode = VDOM.createElement(newTree);
-      document.body.appendChild(_rootNode);
+      rootNode = VDOM.createElement(newTree);
+      document.body.appendChild(rootNode);
     }
-    _oldTree = newTree;
+    oldTree = newTree;
     datepicker = document.getElementById('datepicker');
     if (datepicker) {
-      if (!_pikaday) {
-        _pikaday = new Pikaday({
+      if (!pikaday) {
+        pikaday = new Pikaday({
           field: datepicker,
-          onSelect: _event.updateOpen$
+          onSelect: emitEvent.updateOpen
         });
-        return _pikaday.show();
+        return pikaday.show();
       }
-    } else if (_pikaday) {
-      _pikaday.destroy();
-      return _pikaday = null;
+    } else if (pikaday) {
+      pikaday.destroy();
+      return pikaday = null;
     }
   });
 

@@ -3,5 +3,19 @@
 
 view = @view = {}
 
-['create$','star$','close$','delete$','editName$','editOpen$','updateName$','updateOpen$','search$','export$','sort$'].forEach (stream) ->
+streamNames = [
+  'create'
+  'star'
+  'close'
+  'delete$'
+  'editName'
+  'editOpen'
+  'updateName'
+  'updateOpen'
+  'search'
+  'export$'
+  'sort'
+]
+
+for stream in streamNames
   view[stream] = new Rx.Subject()

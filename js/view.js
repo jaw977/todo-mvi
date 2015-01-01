@@ -1,10 +1,13 @@
 (function() {
-  var view;
+  var stream, streamNames, view, _i, _len;
 
   view = this.view = {};
 
-  ['create$', 'star$', 'close$', 'delete$', 'editName$', 'editOpen$', 'updateName$', 'updateOpen$', 'search$', 'export$', 'sort$'].forEach(function(stream) {
-    return view[stream] = new Rx.Subject();
-  });
+  streamNames = ['create', 'star', 'close', 'delete$', 'editName', 'editOpen', 'updateName', 'updateOpen', 'search', 'export$', 'sort'];
+
+  for (_i = 0, _len = streamNames.length; _i < _len; _i++) {
+    stream = streamNames[_i];
+    view[stream] = new Rx.Subject();
+  }
 
 }).call(this);
