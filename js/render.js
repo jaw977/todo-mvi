@@ -46,6 +46,12 @@
       value: 'all'
     }, 'All')), ' Description:', h.input({
       onkeydown: e.searchName
+    }), ' Closed between:', h.input({
+      id: 'closeStart',
+      size: 8
+    }), '-', h.input({
+      id: 'closeEnd',
+      size: 8
     }), h.br(), h.select({
       onchange: e.sort
     }, h.option({
@@ -117,13 +123,21 @@
   pikaday = null;
 
   model.todos$.subscribe(function(ev) {
-    var datepicker, newTree;
+    var datepicker, field, newTree, _i, _len, _ref;
     newTree = render(ev);
     if (oldTree) {
       rootNode = VDOM.patch(rootNode, VDOM.diff(oldTree, newTree));
     } else {
       rootNode = VDOM.createElement(newTree);
       document.body.appendChild(rootNode);
+      _ref = ['closeStart', 'closeEnd'];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        field = _ref[_i];
+        new Pikaday({
+          onSelect: emitEvent[field],
+          field: document.getElementById(field)
+        });
+      }
     }
     oldTree = newTree;
     datepicker = document.getElementById('datepicker');

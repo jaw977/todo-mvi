@@ -74,13 +74,17 @@ update$ = Rx.Observable.merge updateName$, updateOpen$
 sort$ = intent.sort.map (sort) -> toView.sort = sort if sort
 searchStatus$ = intent.search.map (status) -> toView.status = status if status
 searchName$ = intent.searchName.map (name) -> toView.name = name
-search$ = Rx.Observable.merge load$, sort$, searchStatus$, searchName$
+closeStart$ = intent.closeStart.map (date) -> toView.closeStart = date
+closeEnd$ = intent.closeEnd.map (date) -> toView.closeEnd = date
+search$ = Rx.Observable.merge load$, sort$, searchStatus$, searchName$, closeStart$, closeEnd$
   .map ->
     todos = for id, todo of todosObj
       continue if toView.status == 'open' and todo.close
       continue if toView.status == 'star' and not todo.star
       continue if toView.status == 'close' and not todo.close
       continue if toView.name and todo.name.indexOf(toView.name) == -1
+      continue if toView.closeStart and todo.close < toView.closeStart
+      continue if toView.closeEnd and todo.close > toView.closeEnd
       todo
     todos = _.sortBy todos, toView.sort.split ','
     visibleIds = _.map todos, '_id'

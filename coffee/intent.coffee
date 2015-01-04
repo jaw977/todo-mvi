@@ -28,4 +28,5 @@ for stream in ['updateName','searchName']
     .filter isEnterKey
     .map targetValue
 
-intent.updateOpen = view.updateOpen.map (date) -> util.date.format date
+for stream in ['updateOpen','closeStart','closeEnd']
+  intent[stream] = view[stream].map (date) -> util.date.format date

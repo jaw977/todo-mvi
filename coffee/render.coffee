@@ -27,6 +27,10 @@ render = (ev) ->
       h.option value: 'all', 'All'
     ' Description:'
     h.input onkeydown: e.searchName
+    ' Closed between:'
+    h.input id: 'closeStart', size: 8
+    '-'
+    h.input id: 'closeEnd', size: 8 
     h.br()
     h.select onchange: e.sort,
       h.option value: 'star,open,name', 'Starred First, then opened earliest first'
@@ -73,6 +77,8 @@ model.todos$.subscribe (ev) ->
   else
     rootNode = VDOM.createElement newTree
     document.body.appendChild rootNode
+    for field in ['closeStart','closeEnd']
+      new Pikaday onSelect: emitEvent[field], field: document.getElementById field
   oldTree = newTree
 
   datepicker = document.getElementById 'datepicker'

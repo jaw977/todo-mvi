@@ -1,5 +1,5 @@
 (function() {
-  var intent, isEnterKey, stream, targetValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
+  var intent, isEnterKey, stream, targetValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3, _ref4;
 
   intent = this.intent = {};
 
@@ -48,8 +48,12 @@
     intent[stream] = view[stream].filter(isEnterKey).map(targetValue);
   }
 
-  intent.updateOpen = view.updateOpen.map(function(date) {
-    return util.date.format(date);
-  });
+  _ref4 = ['updateOpen', 'closeStart', 'closeEnd'];
+  for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
+    stream = _ref4[_m];
+    intent[stream] = view[stream].map(function(date) {
+      return util.date.format(date);
+    });
+  }
 
 }).call(this);

@@ -16,6 +16,8 @@ streamNames = [
   'searchName'
   'export$'
   'sort'
+  'closeStart'
+  'closeEnd'
 ]
 
 for stream in streamNames
