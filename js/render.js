@@ -63,7 +63,10 @@
     }, 'Closed earliest first')), h.button({
       type: 'button',
       onclick: e.export$
-    }, 'Export to todo.txt'), ev.showExport ? h.p(h.textarea({
+    }, 'Export to todo.txt'), h.button({
+      type: 'button',
+      onclick: e.purge
+    }, 'Purge all displayed todos'), ev.showExport ? h.p(h.textarea({
       rows: 10,
       cols: 80
     }, ev.todos.map(model.exportTodo).join("\n"))) : void 0, h.br(), h.br(), h.table({}, h.tr({}, (function() {

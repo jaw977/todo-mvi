@@ -56,4 +56,8 @@
     });
   }
 
+  intent.purge = view.purge.filter(function() {
+    return confirm("This will permanently remove all displayed todos from the database!  Are you sure?");
+  });
+
 }).call(this);

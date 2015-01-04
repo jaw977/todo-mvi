@@ -37,6 +37,7 @@ render = (ev) ->
       h.option value: 'star,name', 'Starred First'
       h.option value: 'close,name', 'Closed earliest first'
     h.button type: 'button', onclick: e.export$, 'Export to todo.txt'
+    h.button type: 'button', onclick: e.purge, 'Purge all displayed todos'
     if ev.showExport then h.p h.textarea rows: 10, cols: 80, ev.todos.map(model.exportTodo).join "\n"
     h.br()
     h.br()

@@ -1,5 +1,5 @@
 (function() {
-  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editName$, editOpen$, export$, load$, pouchdb, putTodo, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateName$, updateOpen$, visibleIds;
+  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editName$, editOpen$, export$, load$, pouchdb, purge$, putTodo, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateName$, updateOpen$, visibleIds;
 
   toView = {
     status: 'open',
@@ -118,6 +118,16 @@
     return toView.idEditing = null;
   });
 
+  purge$ = intent.purge.map(function() {
+    var id, _i, _len;
+    for (_i = 0, _len = visibleIds.length; _i < _len; _i++) {
+      id = visibleIds[_i];
+      pouchdb.remove(todosObj[id]);
+      delete todosObj[id];
+    }
+    return visibleIds = [];
+  });
+
   sort$ = intent.sort.map(function(sort) {
     if (sort) {
       return toView.sort = sort;
@@ -187,7 +197,7 @@
       priority = todo.star ? "(A) " : "";
       return "" + closed + priority + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(create$, star$, close$, delete$, search$, export$, edit$, update$).map(function() {
+    todos$: Rx.Observable.merge(create$, star$, close$, delete$, search$, export$, edit$, update$, purge$).map(function() {
       toView.todos = visibleIds.map(function(id) {
         return todosObj[id];
       });

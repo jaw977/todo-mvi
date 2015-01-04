@@ -30,3 +30,6 @@ for stream in ['updateName','searchName']
 
 for stream in ['updateOpen','closeStart','closeEnd']
   intent[stream] = view[stream].map (date) -> util.date.format date
+
+intent.purge = view.purge
+  .filter -> confirm "This will permanently remove all displayed todos from the database!  Are you sure?"

@@ -3,7 +3,7 @@
 
   view = this.view = {};
 
-  streamNames = ['create', 'star', 'close', 'delete$', 'editName', 'editOpen', 'updateName', 'updateOpen', 'search', 'searchName', 'export$', 'sort', 'closeStart', 'closeEnd'];
+  streamNames = ['create', 'star', 'close', 'delete$', 'editName', 'editOpen', 'updateName', 'updateOpen', 'search', 'searchName', 'export$', 'sort', 'closeStart', 'closeEnd', 'purge'];
 
   for (_i = 0, _len = streamNames.length; _i < _len; _i++) {
     stream = streamNames[_i];

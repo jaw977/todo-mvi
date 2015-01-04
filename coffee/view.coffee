@@ -18,6 +18,7 @@ streamNames = [
   'sort'
   'closeStart'
   'closeEnd'
+  'purge'
 ]
 
 for stream in streamNames

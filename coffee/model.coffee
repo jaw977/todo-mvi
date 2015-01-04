@@ -71,6 +71,12 @@ update$ = Rx.Observable.merge updateName$, updateOpen$
       putTodo todo
     toView.idEditing = null
 
+purge$ = intent.purge.map ->
+  for id in visibleIds
+    pouchdb.remove todosObj[id]
+    delete todosObj[id]
+  visibleIds = []
+
 sort$ = intent.sort.map (sort) -> toView.sort = sort if sort
 searchStatus$ = intent.search.map (status) -> toView.status = status if status
 searchName$ = intent.searchName.map (name) -> toView.name = name
@@ -100,7 +106,7 @@ export$ = intent.export$.map -> toView.showExport = not toView.showExport
     "#{closed}#{priority}#{todo.open} #{status}#{todo.name}"
     
   todos$:
-    Rx.Observable.merge create$, star$, close$, delete$, search$, export$, edit$, update$
+    Rx.Observable.merge create$, star$, close$, delete$, search$, export$, edit$, update$, purge$
       .map ->
         toView.todos = visibleIds.map (id) -> todosObj[id]
         toView
