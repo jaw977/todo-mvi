@@ -71,17 +71,16 @@ update$ = Rx.Observable.merge updateName$, updateOpen$
       putTodo todo
     toView.idEditing = null
 
-sort$ = intent.sort.map (sort) ->
-  toView.sort = sort if sort
-  null
-
-search$ = Rx.Observable.merge intent.search, load$, sort$
-  .map (status) ->
-    toView.status = status = status or toView.status
+sort$ = intent.sort.map (sort) -> toView.sort = sort if sort
+searchStatus$ = intent.search.map (status) -> toView.status = status if status
+searchName$ = intent.searchName.map (name) -> toView.name = name
+search$ = Rx.Observable.merge load$, sort$, searchStatus$, searchName$
+  .map ->
     todos = for id, todo of todosObj
-      continue if status == 'open' and todo.close
-      continue if status == 'star' and not todo.star
-      continue if status == 'close' and not todo.close
+      continue if toView.status == 'open' and todo.close
+      continue if toView.status == 'star' and not todo.star
+      continue if toView.status == 'close' and not todo.close
+      continue if toView.name and todo.name.indexOf(toView.name) == -1
       todo
     todos = _.sortBy todos, toView.sort.split ','
     visibleIds = _.map todos, '_id'

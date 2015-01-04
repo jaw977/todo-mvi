@@ -13,6 +13,7 @@ streamNames = [
   'updateName'
   'updateOpen'
   'search'
+  'searchName'
   'export$'
   'sort'
 ]

@@ -42,7 +42,7 @@
     });
   }
 
-  _ref3 = ['updateName'];
+  _ref3 = ['updateName', 'searchName'];
   for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
     stream = _ref3[_l];
     intent[stream] = view[stream].filter(isEnterKey).map(targetValue);

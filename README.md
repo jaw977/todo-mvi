@@ -30,7 +30,6 @@ The design is based on [Model-View-Intent](http://futurice.com/blog/reactive-mvc
 - Multi-update
 - Purge
 - Filter on date range (Open or close date)
-- Filter on todo description
 - Double-click Close Date to edit it
 - PouchDB: View to select only open todos, Sync to CouchDB
 - Import from todo.txt

@@ -23,7 +23,7 @@ for stream in ['star','close','delete$']
 for stream in ['editName','editOpen']
   intent[stream] = view[stream].map (ev) -> ev.target.parentNode.id
 
-for stream in ['updateName']
+for stream in ['updateName','searchName']
   intent[stream] = view[stream]
     .filter isEnterKey
     .map targetValue

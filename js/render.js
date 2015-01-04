@@ -2,8 +2,8 @@
   var emitEvent, htmlTag, oldTree, pikaday, render, rootNode,
     __slice = [].slice;
 
-  emitEvent = _.transform(view, function(result, stream, name) {
-    return result[name] = function(ev) {
+  emitEvent = _.mapValues(view, function(stream) {
+    return function(ev) {
       return stream.onNext(ev);
     };
   });
@@ -44,7 +44,9 @@
       value: 'close'
     }, 'Closed'), h.option({
       value: 'all'
-    }, 'All')), h.select({
+    }, 'All')), ' Description:', h.input({
+      onkeydown: e.searchName
+    }), h.br(), h.select({
       onchange: e.sort
     }, h.option({
       value: 'star,open,name'

@@ -1,5 +1,5 @@
 (function() {
-  var close$, create$, delete$, edit$, editName$, editOpen$, export$, load$, pouchdb, putTodo, search$, sort$, star$, toView, todosObj, update$, updateName$, updateOpen$, visibleIds;
+  var close$, create$, delete$, edit$, editName$, editOpen$, export$, load$, pouchdb, putTodo, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateName$, updateOpen$, visibleIds;
 
   toView = {
     status: 'open',
@@ -120,26 +120,37 @@
 
   sort$ = intent.sort.map(function(sort) {
     if (sort) {
-      toView.sort = sort;
+      return toView.sort = sort;
     }
-    return null;
   });
 
-  search$ = Rx.Observable.merge(intent.search, load$, sort$).map(function(status) {
+  searchStatus$ = intent.search.map(function(status) {
+    if (status) {
+      return toView.status = status;
+    }
+  });
+
+  searchName$ = intent.searchName.map(function(name) {
+    return toView.name = name;
+  });
+
+  search$ = Rx.Observable.merge(load$, sort$, searchStatus$, searchName$).map(function() {
     var id, todo, todos;
-    toView.status = status = status || toView.status;
     todos = (function() {
       var _results;
       _results = [];
       for (id in todosObj) {
         todo = todosObj[id];
-        if (status === 'open' && todo.close) {
+        if (toView.status === 'open' && todo.close) {
           continue;
         }
-        if (status === 'star' && !todo.star) {
+        if (toView.status === 'star' && !todo.star) {
           continue;
         }
-        if (status === 'close' && !todo.close) {
+        if (toView.status === 'close' && !todo.close) {
+          continue;
+        }
+        if (toView.name && todo.name.indexOf(toView.name) === -1) {
           continue;
         }
         _results.push(todo);

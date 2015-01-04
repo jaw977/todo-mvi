@@ -1,7 +1,6 @@
-## Dependencies: VDOM(virtual-dom, virtual-hyperscript), _(lodash), util, view, model
+## Dependencies: VDOM(virtual-dom, virtual-hyperscript), _(lodash), Pikaday, util, view, model
 
-emitEvent = _.transform view, (result, stream, name) ->
-  result[name] = (ev) -> stream.onNext ev
+emitEvent = _.mapValues view, (stream) -> (ev) -> stream.onNext ev
 
 htmlTag = (tag, children...) ->
   attrs = if children.length and _.isPlainObject children[0] then children.shift() else {}
@@ -26,6 +25,9 @@ render = (ev) ->
       h.option value: 'star', 'Starred'
       h.option value: 'close', 'Closed'
       h.option value: 'all', 'All'
+    ' Description:'
+    h.input onkeydown: e.searchName
+    h.br()
     h.select onchange: e.sort,
       h.option value: 'star,open,name', 'Starred First, then opened earliest first'
       h.option value: 'star,name', 'Starred First'
