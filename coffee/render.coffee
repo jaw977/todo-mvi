@@ -55,7 +55,12 @@ render = (ev) ->
             if todo.close
               className = if todo.deleted then "deleted" else "closed"
               mark = if todo.deleted then "×" else "✓"
-              h.span className: className, onclick: e.close, "#{mark} #{util.date.short todo.close} "
+              [ h.span className: className, onclick: e.close, "#{mark} "
+                if ev.idEditing == todo._id and ev.fieldEditing == 'close'
+                  h.input size: 8, value: todo.close, id:'datepicker'
+                else
+                  h.span className: className, ondblclick: e.editClose, util.date.short todo.close
+              ]
             else 
               className = if todo.star then "starred" else "off"
               mark = if todo.star then "★" else "☆"
@@ -85,7 +90,7 @@ model.todos$.subscribe (ev) ->
   datepicker = document.getElementById 'datepicker'
   if datepicker
     if not pikaday
-      pikaday = new Pikaday field: datepicker, onSelect: emitEvent.updateOpen
+      pikaday = new Pikaday field: datepicker, onSelect: emitEvent[if ev.fieldEditing == 'close' then 'updateClose' else 'updateOpen']
       pikaday.show()
   else if pikaday
     pikaday.destroy()

@@ -1,5 +1,5 @@
 (function() {
-  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editName$, editOpen$, export$, load$, pouchdb, purge$, putTodo, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateName$, updateOpen$, visibleIds;
+  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, load$, pouchdb, purge$, putTodo, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
 
   toView = {
     status: 'open',
@@ -92,7 +92,11 @@
     return ['open', id];
   });
 
-  edit$ = Rx.Observable.merge(editName$, editOpen$).map(function(_arg) {
+  editClose$ = intent.editClose.map(function(id) {
+    return ['close', id];
+  });
+
+  edit$ = Rx.Observable.merge(editName$, editOpen$, editClose$).map(function(_arg) {
     var field, id;
     field = _arg[0], id = _arg[1];
     toView.idEditing = id;
@@ -107,7 +111,11 @@
     return ['open', open];
   });
 
-  update$ = Rx.Observable.merge(updateName$, updateOpen$).map(function(_arg) {
+  updateClose$ = intent.updateClose.map(function(close) {
+    return ['close', close];
+  });
+
+  update$ = Rx.Observable.merge(updateName$, updateOpen$, updateClose$).map(function(_arg) {
     var field, todo, value;
     field = _arg[0], value = _arg[1];
     todo = todosObj[toView.idEditing];

@@ -93,10 +93,19 @@
           id: 'datepicker'
         })) : h.td({
           ondblclick: e.editOpen
-        }, util.date.short(todo.open)), h.td({}, todo.close ? (className = todo.deleted ? "deleted" : "closed", mark = todo.deleted ? "×" : "✓", h.span({
-          className: className,
-          onclick: e.close
-        }, "" + mark + " " + (util.date.short(todo.close)) + " ")) : (className = todo.star ? "starred" : "off", mark = todo.star ? "★" : "☆", [
+        }, util.date.short(todo.open)), h.td({}, todo.close ? (className = todo.deleted ? "deleted" : "closed", mark = todo.deleted ? "×" : "✓", [
+          h.span({
+            className: className,
+            onclick: e.close
+          }, "" + mark + " "), ev.idEditing === todo._id && ev.fieldEditing === 'close' ? h.input({
+            size: 8,
+            value: todo.close,
+            id: 'datepicker'
+          }) : h.span({
+            className: className,
+            ondblclick: e.editClose
+          }, util.date.short(todo.close))
+        ]) : (className = todo.star ? "starred" : "off", mark = todo.star ? "★" : "☆", [
           h.span({
             className: "off",
             onclick: e.close
@@ -148,7 +157,7 @@
       if (!pikaday) {
         pikaday = new Pikaday({
           field: datepicker,
-          onSelect: emitEvent.updateOpen
+          onSelect: emitEvent[ev.fieldEditing === 'close' ? 'updateClose' : 'updateOpen']
         });
         return pikaday.show();
       }

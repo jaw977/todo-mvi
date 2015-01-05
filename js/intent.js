@@ -26,7 +26,7 @@
     return name.length;
   });
 
-  _ref1 = ['star', 'close', 'delete$'];
+  _ref1 = ['star', 'close', 'delete$', 'editClose'];
   for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
     stream = _ref1[_j];
     intent[stream] = view[stream].map(function(ev) {
@@ -48,7 +48,7 @@
     intent[stream] = view[stream].filter(isEnterKey).map(targetValue);
   }
 
-  _ref4 = ['updateOpen', 'closeStart', 'closeEnd'];
+  _ref4 = ['updateOpen', 'updateClose', 'closeStart', 'closeEnd'];
   for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
     stream = _ref4[_m];
     intent[stream] = view[stream].map(function(date) {

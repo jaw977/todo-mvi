@@ -56,14 +56,16 @@ delete$ = intent.delete$.map (id) ->
 
 editName$ = intent.editName.map (id) -> ['name', id]
 editOpen$ = intent.editOpen.map (id) -> ['open', id]
-edit$ = Rx.Observable.merge editName$, editOpen$
+editClose$ = intent.editClose.map (id) -> ['close', id]
+edit$ = Rx.Observable.merge editName$, editOpen$, editClose$
   .map ([field,id]) ->
     toView.idEditing = id
     toView.fieldEditing = field
 
 updateName$ = intent.updateName.map (name) -> ['name',name]
 updateOpen$ = intent.updateOpen.map (open) -> ['open',open]
-update$ = Rx.Observable.merge updateName$, updateOpen$
+updateClose$ = intent.updateClose.map (close) -> ['close',close]
+update$ = Rx.Observable.merge updateName$, updateOpen$, updateClose$
   .map ([field,value]) ->
     todo = todosObj[toView.idEditing]
     if todo[field] != value

@@ -17,7 +17,7 @@ intent.create = view.create
     name
   .filter (name) -> name.length
 
-for stream in ['star','close','delete$']
+for stream in ['star','close','delete$','editClose']
   intent[stream] = view[stream].map (ev) -> ev.target.parentNode.parentNode.id
 
 for stream in ['editName','editOpen']
@@ -28,7 +28,7 @@ for stream in ['updateName','searchName']
     .filter isEnterKey
     .map targetValue
 
-for stream in ['updateOpen','closeStart','closeEnd']
+for stream in ['updateOpen','updateClose','closeStart','closeEnd']
   intent[stream] = view[stream].map (date) -> util.date.format date
 
 intent.purge = view.purge
