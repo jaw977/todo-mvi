@@ -21,9 +21,11 @@
     var name;
     name = ev.target.value;
     ev.target.value = '';
-    return name;
-  }).filter(function(name) {
-    return name.length;
+    return {
+      name: name
+    };
+  }).filter(function(obj) {
+    return obj.name.length;
   });
 
   _ref1 = ['star', 'close', 'delete$', 'editClose'];

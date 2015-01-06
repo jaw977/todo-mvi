@@ -1,5 +1,5 @@
 (function() {
-  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, load$, pouchdb, purge$, putTodo, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
+  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, load$, pouchdb, purge$, putTodo, recurTodo, recurUnits, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
 
   toView = {
     status: 'open',
@@ -21,6 +21,36 @@
     });
   };
 
+  recurUnits = {
+    d: 'days',
+    w: 'weeks',
+    m: 'months',
+    y: 'years'
+  };
+
+  recurTodo = function(todo) {
+    var count, matches, name, open, unit;
+    if (!todo.close) {
+      return;
+    }
+    name = todo.name;
+    matches = name.match(/\brecur:(\d+)([dwmy]\b)/);
+    if (!matches) {
+      return;
+    }
+    count = matches[1];
+    unit = recurUnits[matches[2]];
+    open = util.date.format(moment(todo.close).add(count, unit));
+    matches = name.match(/(.*?)\s*--/);
+    if (matches) {
+      name = matches[1];
+    }
+    return {
+      name: name,
+      open: open
+    };
+  };
+
   load$ = Rx.Observable.create(function(observer) {
     return pouchdb.allDocs({
       include_docs: true
@@ -33,19 +63,6 @@
       }
       return observer.onNext();
     });
-  });
-
-  create$ = intent.create.map(function(name) {
-    var id, todo;
-    id = new Date().toISOString();
-    todo = {
-      _id: id,
-      name: name,
-      open: util.date.format()
-    };
-    todosObj[id] = todo;
-    putTodo(todo);
-    return visibleIds.push(id);
   });
 
   star$ = intent.star.map(function(id) {
@@ -67,7 +84,8 @@
     todo.close = todo.close ? false : util.date.format();
     delete todo.star;
     delete todo.deleted;
-    return putTodo(todo);
+    putTodo(todo);
+    return recurTodo(todo);
   });
 
   delete$ = intent.delete$.map(function(id) {
@@ -81,7 +99,24 @@
       todo.close = util.date.format();
       todo.deleted = true;
     }
-    return putTodo(todo);
+    putTodo(todo);
+    return recurTodo(todo);
+  });
+
+  create$ = Rx.Observable.merge(intent.create, close$, delete$).map(function(obj) {
+    var id, todo;
+    if (!obj) {
+      return;
+    }
+    id = new Date().toISOString();
+    todo = {
+      _id: id,
+      open: util.date.format()
+    };
+    _.assign(todo, obj);
+    todosObj[id] = todo;
+    putTodo(todo);
+    return visibleIds.push(id);
   });
 
   editName$ = intent.editName.map(function(id) {
@@ -205,7 +240,7 @@
       priority = todo.star ? "(A) " : "";
       return "" + closed + priority + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(create$, star$, close$, delete$, search$, export$, edit$, update$, purge$).map(function() {
+    todos$: Rx.Observable.merge(create$, star$, search$, export$, edit$, update$, purge$).map(function() {
       toView.todos = visibleIds.map(function(id) {
         return todosObj[id];
       });

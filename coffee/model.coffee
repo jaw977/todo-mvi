@@ -11,21 +11,29 @@ putTodo = (todo) ->
     throw err if err
     todo._rev = result.rev
 
+recurUnits =
+  d: 'days'
+  w: 'weeks'
+  m: 'months'
+  y: 'years'
+
+recurTodo = (todo) ->
+  return if not todo.close
+  name = todo.name
+  matches = name.match /\brecur:(\d+)([dwmy]\b)/
+  return if not matches
+  count = matches[1]
+  unit = recurUnits[matches[2]]
+  open = util.date.format moment(todo.close).add count, unit
+  matches = name.match /(.*?)\s*--/
+  name = matches[1] if matches
+  name: name, open: open
+
 load$ = Rx.Observable.create (observer) ->
   pouchdb.allDocs include_docs: true, (err, doc) ->
     for row in doc.rows
       todosObj[row.id] = row.doc
     observer.onNext()
-
-create$ = intent.create.map (name) ->
-  id = new Date().toISOString()
-  todo =
-    _id: id
-    name: name
-    open: util.date.format()
-  todosObj[id] = todo
-  putTodo todo
-  visibleIds.push id
 
 star$ = intent.star.map (id) ->
   todo = todosObj[id]
@@ -42,6 +50,7 @@ close$ = intent.close.map (id) ->
   delete todo.star
   delete todo.deleted
   putTodo todo
+  recurTodo todo
 
 delete$ = intent.delete$.map (id) ->
   todo = todosObj[id]
@@ -53,6 +62,19 @@ delete$ = intent.delete$.map (id) ->
     todo.close = util.date.format()
     todo.deleted = true
   putTodo todo
+  recurTodo todo
+
+create$ = Rx.Observable.merge intent.create, close$, delete$
+  .map (obj) ->
+    return if not obj
+    id = new Date().toISOString()
+    todo =
+      _id: id
+      open: util.date.format()
+    _.assign todo, obj
+    todosObj[id] = todo
+    putTodo todo
+    visibleIds.push id
 
 editName$ = intent.editName.map (id) -> ['name', id]
 editOpen$ = intent.editOpen.map (id) -> ['open', id]
@@ -108,7 +130,7 @@ export$ = intent.export$.map -> toView.showExport = not toView.showExport
     "#{closed}#{priority}#{todo.open} #{status}#{todo.name}"
     
   todos$:
-    Rx.Observable.merge create$, star$, close$, delete$, search$, export$, edit$, update$, purge$
+    Rx.Observable.merge create$, star$, search$, export$, edit$, update$, purge$
       .map ->
         toView.todos = visibleIds.map (id) -> todosObj[id]
         toView

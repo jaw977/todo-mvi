@@ -14,8 +14,8 @@ intent.create = view.create
   .map (ev) ->
     name = ev.target.value
     ev.target.value = ''
-    name
-  .filter (name) -> name.length
+    name: name
+  .filter (obj) -> obj.name.length
 
 for stream in ['star','close','delete$','editClose']
   intent[stream] = view[stream].map (ev) -> ev.target.parentNode.parentNode.id
