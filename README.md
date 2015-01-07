@@ -22,15 +22,15 @@ The design is based on [Model-View-Intent](http://futurice.com/blog/reactive-mvc
 - Double click a todo's Description to edit it
 - Double click a todo's Open Date to change it (it defaults to the creation date).  If set to the future, the todo is greyed out (this can be used to create todos which are not ready to be worked yet)
 - Export todos to todo.txt format
+- Automatic Recur when closed and indicated by description (e.g. "recur:3d")
+- Purge all displayed todos
+- Filter on close date range
+- Double-click Close Date to edit it
 
 ## Todo
 
-- Recur a todo
-- Automatic Recur when closed and indicated by description (e.g. "recur:+3d")
+- Recur a todo manually?
 - Multi-update
-- Purge
-- Filter on date range (Open or close date)
-- Double-click Close Date to edit it
 - PouchDB: View to select only open todos, Sync to CouchDB
 - Import from todo.txt
 - Recognize / format todo.txt project, context
@@ -38,6 +38,10 @@ The design is based on [Model-View-Intent](http://futurice.com/blog/reactive-mvc
 - package.json for gulp & plugins
 - Use module system / browserify
 - Write tests
+- Config screen
+- Filter on todo description should take effect as it is typed, instead of only when enter is pressed
+- (BUG) The purge button doesn't always purge all the records if many of them are on screen
+- The exposed view streams are Rx.Subject, so any code could call view[stream].onNext.  Find a way to restrict to render.
 
 ## Dependencies
 

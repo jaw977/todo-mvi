@@ -6,33 +6,39 @@ todosObj = {}
 visibleIds = []
 pouchdb = new PouchDB 'todo-mvi'
 
-putTodo = (todo) ->
-  pouchdb.put todo, (err, result) ->
-    throw err if err
-    todo._rev = result.rev
-
 recurUnits =
   d: 'days'
   w: 'weeks'
   m: 'months'
   y: 'years'
 
-recurTodo = (todo) ->
-  return if not todo.close
-  name = todo.name
-  matches = name.match /\brecur:(\d+)([dwmy]\b)/
-  return if not matches
-  count = matches[1]
-  unit = recurUnits[matches[2]]
-  open = util.date.format moment(todo.close).add count, unit
-  matches = name.match /(.*?)\s*--/
-  name = matches[1] if matches
-  name: name, open: open
+todoModelMethods =
+
+  put: ->
+    todo = this
+    pouchdb.put todo.clone(), (err, result) ->
+      throw err if err
+      todo._rev = result.rev
+    todo
+
+  recur: ->
+    return if not @close
+    name = @name
+    matches = name.match /\brecur:(\d+)([dwmy]\b)/
+    return if not matches
+    count = matches[1]
+    unit = recurUnits[matches[2]]
+    open = util.date.format moment(@close).add count, unit
+    matches = name.match /(.*?)\s*--/
+    name = matches[1] if matches
+    name: name, open: open
+
+  clone: -> _.clone @
 
 load$ = Rx.Observable.create (observer) ->
   pouchdb.allDocs include_docs: true, (err, doc) ->
     for row in doc.rows
-      todosObj[row.id] = row.doc
+      todosObj[row.id] = _.create todoModelMethods, row.doc
     observer.onNext()
 
 star$ = intent.star.map (id) ->
@@ -42,15 +48,14 @@ star$ = intent.star.map (id) ->
       delete todo.star
     else
       todo.star = true
-    putTodo todo
+    todo.put()
 
 close$ = intent.close.map (id) ->
   todo = todosObj[id]
   todo.close = if todo.close then false else util.date.format()
   delete todo.star
   delete todo.deleted
-  putTodo todo
-  recurTodo todo
+  todo.put().recur()
 
 delete$ = intent.delete$.map (id) ->
   todo = todosObj[id]
@@ -61,19 +66,16 @@ delete$ = intent.delete$.map (id) ->
   else
     todo.close = util.date.format()
     todo.deleted = true
-  putTodo todo
-  recurTodo todo
+  todo.put().recur()
 
 create$ = Rx.Observable.merge intent.create, close$, delete$
   .map (obj) ->
     return if not obj
     id = new Date().toISOString()
-    todo =
-      _id: id
-      open: util.date.format()
+    todo = _.create todoModelMethods, _id: id, open: util.date.format()
     _.assign todo, obj
     todosObj[id] = todo
-    putTodo todo
+    todo.put()
     visibleIds.push id
 
 editName$ = intent.editName.map (id) -> ['name', id]
@@ -92,7 +94,7 @@ update$ = Rx.Observable.merge updateName$, updateOpen$, updateClose$
     todo = todosObj[toView.idEditing]
     if todo[field] != value
       todo[field] = value
-      putTodo todo
+      todo.put()
     toView.idEditing = null
 
 purge$ = intent.purge.map ->
@@ -132,5 +134,5 @@ export$ = intent.export$.map -> toView.showExport = not toView.showExport
   todos$:
     Rx.Observable.merge create$, star$, search$, export$, edit$, update$, purge$
       .map ->
-        toView.todos = visibleIds.map (id) -> todosObj[id]
+        toView.todos = visibleIds.map (id) -> todosObj[id].clone()
         toView

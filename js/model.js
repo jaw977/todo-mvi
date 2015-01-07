@@ -1,5 +1,5 @@
 (function() {
-  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, load$, pouchdb, purge$, putTodo, recurTodo, recurUnits, search$, searchName$, searchStatus$, sort$, star$, toView, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
+  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, load$, pouchdb, purge$, recurUnits, search$, searchName$, searchStatus$, sort$, star$, toView, todoModelMethods, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
 
   toView = {
     status: 'open',
@@ -12,15 +12,6 @@
 
   pouchdb = new PouchDB('todo-mvi');
 
-  putTodo = function(todo) {
-    return pouchdb.put(todo, function(err, result) {
-      if (err) {
-        throw err;
-      }
-      return todo._rev = result.rev;
-    });
-  };
-
   recurUnits = {
     d: 'days',
     w: 'weeks',
@@ -28,27 +19,43 @@
     y: 'years'
   };
 
-  recurTodo = function(todo) {
-    var count, matches, name, open, unit;
-    if (!todo.close) {
-      return;
+  todoModelMethods = {
+    put: function() {
+      var todo;
+      todo = this;
+      pouchdb.put(todo.clone(), function(err, result) {
+        if (err) {
+          throw err;
+        }
+        return todo._rev = result.rev;
+      });
+      return todo;
+    },
+    recur: function() {
+      var count, matches, name, open, unit;
+      if (!this.close) {
+        return;
+      }
+      name = this.name;
+      matches = name.match(/\brecur:(\d+)([dwmy]\b)/);
+      if (!matches) {
+        return;
+      }
+      count = matches[1];
+      unit = recurUnits[matches[2]];
+      open = util.date.format(moment(this.close).add(count, unit));
+      matches = name.match(/(.*?)\s*--/);
+      if (matches) {
+        name = matches[1];
+      }
+      return {
+        name: name,
+        open: open
+      };
+    },
+    clone: function() {
+      return _.clone(this);
     }
-    name = todo.name;
-    matches = name.match(/\brecur:(\d+)([dwmy]\b)/);
-    if (!matches) {
-      return;
-    }
-    count = matches[1];
-    unit = recurUnits[matches[2]];
-    open = util.date.format(moment(todo.close).add(count, unit));
-    matches = name.match(/(.*?)\s*--/);
-    if (matches) {
-      name = matches[1];
-    }
-    return {
-      name: name,
-      open: open
-    };
   };
 
   load$ = Rx.Observable.create(function(observer) {
@@ -59,7 +66,7 @@
       _ref = doc.rows;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
-        todosObj[row.id] = row.doc;
+        todosObj[row.id] = _.create(todoModelMethods, row.doc);
       }
       return observer.onNext();
     });
@@ -74,7 +81,7 @@
       } else {
         todo.star = true;
       }
-      return putTodo(todo);
+      return todo.put();
     }
   });
 
@@ -84,8 +91,7 @@
     todo.close = todo.close ? false : util.date.format();
     delete todo.star;
     delete todo.deleted;
-    putTodo(todo);
-    return recurTodo(todo);
+    return todo.put().recur();
   });
 
   delete$ = intent.delete$.map(function(id) {
@@ -99,8 +105,7 @@
       todo.close = util.date.format();
       todo.deleted = true;
     }
-    putTodo(todo);
-    return recurTodo(todo);
+    return todo.put().recur();
   });
 
   create$ = Rx.Observable.merge(intent.create, close$, delete$).map(function(obj) {
@@ -109,13 +114,13 @@
       return;
     }
     id = new Date().toISOString();
-    todo = {
+    todo = _.create(todoModelMethods, {
       _id: id,
       open: util.date.format()
-    };
+    });
     _.assign(todo, obj);
     todosObj[id] = todo;
-    putTodo(todo);
+    todo.put();
     return visibleIds.push(id);
   });
 
@@ -156,7 +161,7 @@
     todo = todosObj[toView.idEditing];
     if (todo[field] !== value) {
       todo[field] = value;
-      putTodo(todo);
+      todo.put();
     }
     return toView.idEditing = null;
   });
@@ -242,7 +247,7 @@
     },
     todos$: Rx.Observable.merge(create$, star$, search$, export$, edit$, update$, purge$).map(function() {
       toView.todos = visibleIds.map(function(id) {
-        return todosObj[id];
+        return todosObj[id].clone();
       });
       return toView;
     })
