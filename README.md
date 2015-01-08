@@ -31,7 +31,8 @@ The design is based on [Model-View-Intent](http://futurice.com/blog/reactive-mvc
 
 - Recur a todo manually?
 - Multi-update
-- PouchDB: View to select only open todos, Sync to CouchDB
+- PouchDB: View to select only open todos
+- PouchDB: Sync to CouchDB
 - Import from todo.txt
 - Recognize / format todo.txt project, context
 - Use Immutable.js
@@ -42,6 +43,8 @@ The design is based on [Model-View-Intent](http://futurice.com/blog/reactive-mvc
 - Filter on todo description should take effect as it is typed, instead of only when enter is pressed
 - (BUG) The purge button doesn't always purge all the records if many of them are on screen
 - The exposed view streams are Rx.Subject, so any code could call view[stream].onNext.  Find a way to restrict to render.
+- Improve visual UI design / appearence of header area
+- Move other todo functionality (toggle star, close, delete) to todo prototype methods
 
 ## Dependencies
 

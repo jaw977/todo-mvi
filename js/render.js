@@ -66,10 +66,16 @@
     }, 'Export to todo.txt'), h.button({
       type: 'button',
       onclick: e.purge
-    }, 'Purge all displayed todos'), ev.showExport ? h.p(h.textarea({
+    }, 'Purge all displayed todos'), h.button({
+      type: 'button',
+      onclick: e.config
+    }, 'Config'), ev.showExport ? h.p(h.textarea({
       rows: 10,
       cols: 80
-    }, ev.todos.map(model.exportTodo).join("\n"))) : void 0, h.br(), h.br(), h.table({}, h.tr({}, (function() {
+    }, ev.todos.map(model.exportTodo).join("\n"))) : void 0, ev.showConfig ? h.p('CouchDB Server: ', h.input({
+      onkeydown: e.couchdb,
+      value: ev.couchdb
+    })) : void 0, h.br(), h.br(), h.table({}, h.tr({}, (function() {
       var _i, _len, _ref, _results;
       _ref = ['Open', 'Status', 'Description'];
       _results = [];

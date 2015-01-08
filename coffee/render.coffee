@@ -38,7 +38,9 @@ render = (ev) ->
       h.option value: 'close,name', 'Closed earliest first'
     h.button type: 'button', onclick: e.export$, 'Export to todo.txt'
     h.button type: 'button', onclick: e.purge, 'Purge all displayed todos'
+    h.button type: 'button', onclick: e.config, 'Config'
     if ev.showExport then h.p h.textarea rows: 10, cols: 80, ev.todos.map(model.exportTodo).join "\n"
+    if ev.showConfig then h.p 'CouchDB Server: ', h.input onkeydown: e.couchdb, value: ev.couchdb
     h.br()
     h.br()
     h.table {},

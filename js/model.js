@@ -1,5 +1,5 @@
 (function() {
-  var close$, closeEnd$, closeStart$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, load$, pouchdb, purge$, recurUnits, search$, searchName$, searchStatus$, sort$, star$, toView, todoModelMethods, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
+  var close$, closeEnd$, closeStart$, config$, configDoc, couchdb$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, handleError, load$, pouchdb, purge$, putDoc, recurUnits, search$, searchName$, searchStatus$, sort$, star$, toView, todoModelMethods, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
 
   toView = {
     status: 'open',
@@ -12,6 +12,28 @@
 
   pouchdb = new PouchDB('todo-mvi');
 
+  configDoc = {
+    _id: 'config'
+  };
+
+  handleError = function(err) {
+    alert("Error: " + err);
+    throw err;
+  };
+
+  putDoc = function(doc) {
+    pouchdb.put(_.clone(doc), function(err, result) {
+      if (err) {
+        throw err;
+      }
+      return doc._rev = result.rev;
+    });
+    if (configDoc.couchdb) {
+      pouchdb.replicate.to(configDoc.couchdb);
+    }
+    return doc;
+  };
+
   recurUnits = {
     d: 'days',
     w: 'weeks',
@@ -21,15 +43,7 @@
 
   todoModelMethods = {
     put: function() {
-      var todo;
-      todo = this;
-      pouchdb.put(todo.clone(), function(err, result) {
-        if (err) {
-          throw err;
-        }
-        return todo._rev = result.rev;
-      });
-      return todo;
+      return putDoc(this);
     },
     recur: function() {
       var count, matches, name, open, unit;
@@ -66,9 +80,33 @@
       _ref = doc.rows;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         row = _ref[_i];
-        todosObj[row.id] = _.create(todoModelMethods, row.doc);
+        if (row.id === 'config') {
+          configDoc = row.doc;
+          toView.couchdb = configDoc.couchdb;
+        } else {
+          todosObj[row.id] = _.create(todoModelMethods, row.doc);
+        }
       }
-      return observer.onNext();
+      observer.onNext();
+      if (configDoc.couchdb) {
+        return pouchdb.replicate.from(configDoc.couchdb).on('error', function() {
+          return handleError;
+        }).on('complete', function() {
+          return pouchdb.allDocs({
+            include_docs: true
+          }, function(err, doc) {
+            var _j, _len1, _ref1;
+            _ref1 = doc.rows;
+            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+              row = _ref1[_j];
+              if (row.id !== 'config') {
+                todosObj[row.id] = _.create(todoModelMethods, row.doc);
+              }
+            }
+            return observer.onNext();
+          });
+        });
+      }
     });
   });
 
@@ -237,6 +275,21 @@
     return toView.showExport = !toView.showExport;
   });
 
+  config$ = intent.config.map(function() {
+    return toView.showConfig = !toView.showConfig;
+  });
+
+  couchdb$ = intent.couchdb.subscribe(function(server) {
+    if (server === configDoc.couchdb) {
+      return;
+    }
+    configDoc.couchdb = toView.couchdb = server;
+    putDoc(configDoc);
+    if (server) {
+      return pouchdb.sync(server);
+    }
+  });
+
   this.model = {
     exportTodo: function(todo) {
       var closed, priority, status;
@@ -245,7 +298,7 @@
       priority = todo.star ? "(A) " : "";
       return "" + closed + priority + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(create$, star$, search$, export$, edit$, update$, purge$).map(function() {
+    todos$: Rx.Observable.merge(create$, star$, search$, export$, edit$, update$, purge$, config$).map(function() {
       toView.todos = visibleIds.map(function(id) {
         return todosObj[id].clone();
       });

@@ -21,6 +21,8 @@ streamNames = [
   'closeStart'
   'closeEnd'
   'purge'
+  'config'
+  'couchdb'
 ]
 
 for stream in streamNames

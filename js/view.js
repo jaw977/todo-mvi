@@ -3,7 +3,7 @@
 
   view = this.view = {};
 
-  streamNames = ['create', 'star', 'close', 'delete$', 'editName', 'editOpen', 'editClose', 'updateName', 'updateOpen', 'updateClose', 'search', 'searchName', 'export$', 'sort', 'closeStart', 'closeEnd', 'purge'];
+  streamNames = ['create', 'star', 'close', 'delete$', 'editName', 'editOpen', 'editClose', 'updateName', 'updateOpen', 'updateClose', 'search', 'searchName', 'export$', 'sort', 'closeStart', 'closeEnd', 'purge', 'config', 'couchdb'];
 
   for (_i = 0, _len = streamNames.length; _i < _len; _i++) {
     stream = streamNames[_i];

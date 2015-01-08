@@ -11,7 +11,7 @@
     return ev.keyCode === 13;
   };
 
-  _ref = ['search', 'sort', 'export$'];
+  _ref = ['search', 'sort', 'export$', 'config'];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     stream = _ref[_i];
     intent[stream] = view[stream].map(targetValue);
@@ -44,7 +44,7 @@
     });
   }
 
-  _ref3 = ['updateName', 'searchName'];
+  _ref3 = ['updateName', 'searchName', 'couchdb'];
   for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
     stream = _ref3[_l];
     intent[stream] = view[stream].filter(isEnterKey).map(targetValue);

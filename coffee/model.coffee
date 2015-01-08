@@ -5,6 +5,18 @@ toView = status: 'open', sort:'star,open,name'
 todosObj = {}
 visibleIds = []
 pouchdb = new PouchDB 'todo-mvi'
+configDoc = _id: 'config'
+
+handleError = (err) ->
+  alert "Error: #{err}"
+  throw err
+
+putDoc = (doc) ->
+  pouchdb.put _.clone(doc), (err, result) ->
+    throw err if err
+    doc._rev = result.rev
+  pouchdb.replicate.to configDoc.couchdb if configDoc.couchdb
+  doc
 
 recurUnits =
   d: 'days'
@@ -14,12 +26,7 @@ recurUnits =
 
 todoModelMethods =
 
-  put: ->
-    todo = this
-    pouchdb.put todo.clone(), (err, result) ->
-      throw err if err
-      todo._rev = result.rev
-    todo
+  put: -> putDoc @
 
   recur: ->
     return if not @close
@@ -38,8 +45,21 @@ todoModelMethods =
 load$ = Rx.Observable.create (observer) ->
   pouchdb.allDocs include_docs: true, (err, doc) ->
     for row in doc.rows
-      todosObj[row.id] = _.create todoModelMethods, row.doc
+      if row.id == 'config'
+        configDoc = row.doc
+        toView.couchdb = configDoc.couchdb
+      else
+        todosObj[row.id] = _.create todoModelMethods, row.doc
     observer.onNext()
+
+    if configDoc.couchdb
+      pouchdb.replicate.from configDoc.couchdb
+        .on 'error', -> handleError
+        .on 'complete', ->
+          pouchdb.allDocs include_docs: true, (err, doc) ->
+            for row in doc.rows when row.id != 'config'
+              todosObj[row.id] = _.create todoModelMethods, row.doc
+            observer.onNext()
 
 star$ = intent.star.map (id) ->
   todo = todosObj[id]
@@ -122,6 +142,13 @@ search$ = Rx.Observable.merge load$, sort$, searchStatus$, searchName$, closeSta
     visibleIds = _.map todos, '_id'
 
 export$ = intent.export$.map -> toView.showExport = not toView.showExport
+config$ = intent.config.map -> toView.showConfig = not toView.showConfig
+
+couchdb$ = intent.couchdb.subscribe (server) ->
+  return if server == configDoc.couchdb
+  configDoc.couchdb = toView.couchdb = server
+  putDoc configDoc
+  pouchdb.sync server if server
 
 @model =
   
@@ -132,7 +159,7 @@ export$ = intent.export$.map -> toView.showExport = not toView.showExport
     "#{closed}#{priority}#{todo.open} #{status}#{todo.name}"
     
   todos$:
-    Rx.Observable.merge create$, star$, search$, export$, edit$, update$, purge$
+    Rx.Observable.merge create$, star$, search$, export$, edit$, update$, purge$, config$
       .map ->
         toView.todos = visibleIds.map (id) -> todosObj[id].clone()
         toView

@@ -6,7 +6,7 @@ intent = @intent = {}
 targetValue = (ev) -> ev.target.value
 isEnterKey = (ev) -> ev.keyCode == 13
 
-for stream in ['search','sort','export$']
+for stream in ['search','sort','export$','config']
   intent[stream] = view[stream].map targetValue
 
 intent.create = view.create
@@ -23,7 +23,7 @@ for stream in ['star','close','delete$','editClose']
 for stream in ['editName','editOpen']
   intent[stream] = view[stream].map (ev) -> ev.target.parentNode.id
 
-for stream in ['updateName','searchName']
+for stream in ['updateName','searchName','couchdb']
   intent[stream] = view[stream]
     .filter isEnterKey
     .map targetValue
