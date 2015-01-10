@@ -24,17 +24,20 @@
   });
 
   renderTodoName = function(todo) {
-    var formatted, matches, name;
+    var all, before, className, formatted, matches, name, project;
     name = ' ' + todo.name;
     formatted = [];
     while (matches = name.match(/(.*?\s)([\+\@]\w*)(.*)/)) {
-      if (formatted.length || matches[1].match(/\w/)) {
-        formatted.push(matches[1]);
+      all = matches[0], before = matches[1], project = matches[2], name = matches[3];
+      if (formatted.length || before.match(/\w/)) {
+        formatted.push(before);
       }
+      className = project[0] === '+' ? 'project' : 'context';
       formatted.push(htmlTag.span({
-        className: (matches[2][0] === '+' ? 'project' : 'context')
-      }, matches[2]));
-      name = matches[3];
+        onclick: emitEvent.project,
+        value: project,
+        className: className
+      }, project));
     }
     if (name.match(/\w/)) {
       formatted.push(name);
@@ -64,7 +67,8 @@
     }, 'Closed'), h.option({
       value: 'all'
     }, 'All')), ' Description:', h.input({
-      onkeydown: e.searchName
+      onkeydown: e.searchName,
+      value: ev.name
     }), ' Closed between:', h.input({
       id: 'closeStart',
       size: 8

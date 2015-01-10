@@ -12,9 +12,10 @@ renderTodoName = (todo) ->
   name = ' ' + todo.name
   formatted = []
   while matches = name.match /(.*?\s)([\+\@]\w*)(.*)/
-    formatted.push matches[1] if formatted.length or matches[1].match /\w/
-    formatted.push htmlTag.span className: (if matches[2][0] == '+' then 'project' else 'context'), matches[2]
-    name = matches[3]
+    [all, before, project, name] = matches
+    formatted.push before if formatted.length or before.match /\w/
+    className = if project[0] == '+' then 'project' else 'context'
+    formatted.push htmlTag.span onclick: emitEvent.project, value: project, className: className, project
   formatted.push name if name.match /\w/
   formatted
 
@@ -36,7 +37,7 @@ render = (ev) ->
       h.option value: 'close', 'Closed'
       h.option value: 'all', 'All'
     ' Description:'
-    h.input onkeydown: e.searchName
+    h.input onkeydown: e.searchName, value: ev.name
     ' Closed between:'
     h.input id: 'closeStart', size: 8
     '-'

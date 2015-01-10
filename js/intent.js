@@ -11,7 +11,7 @@
     return ev.keyCode === 13;
   };
 
-  _ref = ['search', 'sort', 'export$', 'config'];
+  _ref = ['search', 'sort', 'export$', 'config', 'project'];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     stream = _ref[_i];
     intent[stream] = view[stream].map(targetValue);

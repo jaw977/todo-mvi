@@ -23,6 +23,7 @@ streamNames = [
   'purge'
   'config'
   'couchdb'
+  'project'
 ]
 
 for stream in streamNames

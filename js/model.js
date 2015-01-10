@@ -226,7 +226,7 @@
     }
   });
 
-  searchName$ = intent.searchName.map(function(name) {
+  searchName$ = Rx.Observable.merge(intent.searchName, intent.project).map(function(name) {
     return toView.name = name;
   });
 

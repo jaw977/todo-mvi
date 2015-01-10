@@ -6,7 +6,7 @@ intent = @intent = {}
 targetValue = (ev) -> ev.target.value
 isEnterKey = (ev) -> ev.keyCode == 13
 
-for stream in ['search','sort','export$','config']
+for stream in ['search','sort','export$','config','project']
   intent[stream] = view[stream].map targetValue
 
 intent.create = view.create

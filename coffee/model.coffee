@@ -125,7 +125,8 @@ purge$ = intent.purge.map ->
 
 sort$ = intent.sort.map (sort) -> toView.sort = sort if sort
 searchStatus$ = intent.search.map (status) -> toView.status = status if status
-searchName$ = intent.searchName.map (name) -> toView.name = name
+searchName$ = Rx.Observable.merge intent.searchName, intent.project
+  .map (name) -> toView.name = name
 closeStart$ = intent.closeStart.map (date) -> toView.closeStart = date
 closeEnd$ = intent.closeEnd.map (date) -> toView.closeEnd = date
 search$ = Rx.Observable.merge load$, sort$, searchStatus$, searchName$, closeStart$, closeEnd$
