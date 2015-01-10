@@ -18,19 +18,29 @@ th {
 tr.future td {
   color: #c0c0c0;
 }
+.off,
+.starred,
+.closed,
+.deleted,
+.project,
+.context {
+  cursor: pointer;
+}
 .off {
   color: #c0c0c0;
-  cursor: pointer;
 }
 .starred {
   color: #ffa500;
-  cursor: pointer;
 }
 .closed {
   color: #008000;
-  cursor: pointer;
 }
 .deleted {
   color: #f00;
-  cursor: pointer;
+}
+.project {
+  color: #00f;
+}
+.context {
+  color: #800080;
 }

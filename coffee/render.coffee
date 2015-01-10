@@ -5,8 +5,18 @@ emitEvent = _.mapValues view, (stream) -> (ev) -> stream.onNext ev
 htmlTag = (tag, children...) ->
   attrs = if children.length and _.isPlainObject children[0] then children.shift() else {}
   VDOM.h tag, attrs, _.flatten children, true
-['div','span','button','br','input','textarea','select','option','table','tr','th','td','p'].forEach (tag) ->
+['div','span','button','br','input','textarea','select','option','table','tr','th','td','p','a'].forEach (tag) ->
   htmlTag[tag] = (children...) -> htmlTag tag, children...
+
+renderTodoName = (todo) ->
+  name = ' ' + todo.name
+  formatted = []
+  while matches = name.match /(.*?\s)([\+\@]\w*)(.*)/
+    formatted.push matches[1] if formatted.length or matches[1].match /\w/
+    formatted.push htmlTag.span className: (if matches[2][0] == '+' then 'project' else 'context'), matches[2]
+    name = matches[3]
+  formatted.push name if name.match /\w/
+  formatted
 
 render = (ev) ->
   #console.log ev
@@ -72,7 +82,7 @@ render = (ev) ->
           if ev.idEditing == todo._id and ev.fieldEditing == 'name'
             h.td h.input size: 50, value: todo.name, onkeydown: e.updateName
           else
-            h.td ondblclick: e.editName, todo.name
+            h.td ondblclick: e.editName, renderTodoName todo
             
 oldTree = null
 rootNode = null

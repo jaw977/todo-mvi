@@ -17,11 +17,11 @@ intent.create = view.create
     name: name
   .filter (obj) -> obj.name.length
 
-for stream in ['star','close','delete$','editClose']
-  intent[stream] = view[stream].map (ev) -> ev.target.parentNode.parentNode.id
-
-for stream in ['editName','editOpen']
-  intent[stream] = view[stream].map (ev) -> ev.target.parentNode.id
+for stream in ['editName','editOpen','editClose','star','close','delete$']
+  intent[stream] = view[stream].map (ev) ->
+    el = ev.target
+    el = el.parentNode while el.tagName != 'TR'
+    el.id
 
 for stream in ['updateName','searchName','couchdb']
   intent[stream] = view[stream]

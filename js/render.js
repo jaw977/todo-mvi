@@ -1,5 +1,5 @@
 (function() {
-  var emitEvent, htmlTag, oldTree, pikaday, render, rootNode,
+  var emitEvent, htmlTag, oldTree, pikaday, render, renderTodoName, rootNode,
     __slice = [].slice;
 
   emitEvent = _.mapValues(view, function(stream) {
@@ -15,13 +15,32 @@
     return VDOM.h(tag, attrs, _.flatten(children, true));
   };
 
-  ['div', 'span', 'button', 'br', 'input', 'textarea', 'select', 'option', 'table', 'tr', 'th', 'td', 'p'].forEach(function(tag) {
+  ['div', 'span', 'button', 'br', 'input', 'textarea', 'select', 'option', 'table', 'tr', 'th', 'td', 'p', 'a'].forEach(function(tag) {
     return htmlTag[tag] = function() {
       var children;
       children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return htmlTag.apply(null, [tag].concat(__slice.call(children)));
     };
   });
+
+  renderTodoName = function(todo) {
+    var formatted, matches, name;
+    name = ' ' + todo.name;
+    formatted = [];
+    while (matches = name.match(/(.*?\s)([\+\@]\w*)(.*)/)) {
+      if (formatted.length || matches[1].match(/\w/)) {
+        formatted.push(matches[1]);
+      }
+      formatted.push(htmlTag.span({
+        className: (matches[2][0] === '+' ? 'project' : 'context')
+      }, matches[2]));
+      name = matches[3];
+    }
+    if (name.match(/\w/)) {
+      formatted.push(name);
+    }
+    return formatted;
+  };
 
   render = function(ev) {
     var className, e, h, heading, mark, today, todo;
@@ -128,7 +147,7 @@
           onkeydown: e.updateName
         })) : h.td({
           ondblclick: e.editName
-        }, todo.name)));
+        }, renderTodoName(todo))));
       }
       return _results;
     })()));
