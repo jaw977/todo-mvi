@@ -2,11 +2,11 @@
 
 emitEvent = _.mapValues view, (stream) -> (ev) -> stream.onNext ev
 
-htmlTag = (tag, children...) ->
-  attrs = if children.length and _.isPlainObject children[0] then children.shift() else {}
-  VDOM.h tag, attrs, _.flatten children, true
+htmlTag = {}
 ['div','span','button','br','input','textarea','select','option','table','tr','th','td','p','a'].forEach (tag) ->
-  htmlTag[tag] = (children...) -> htmlTag tag, children...
+  htmlTag[tag] = (children...) ->
+    attrs = if children.length and _.isPlainObject children[0] then children.shift() else {}
+    VDOM.h tag, attrs, _.flatten _.filter(children), true
 
 renderTodoName = (todo) ->
   name = ' ' + todo.name
@@ -92,7 +92,8 @@ pikaday = null
 model.todos$.subscribe (ev) ->
   newTree = render ev
   if oldTree
-    rootNode = VDOM.patch rootNode, VDOM.diff oldTree, newTree
+    diff = VDOM.diff oldTree, newTree
+    rootNode = VDOM.patch rootNode, diff
   else
     rootNode = VDOM.createElement newTree
     document.body.appendChild rootNode

@@ -8,18 +8,14 @@
     };
   });
 
-  htmlTag = function() {
-    var attrs, children, tag;
-    tag = arguments[0], children = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    attrs = children.length && _.isPlainObject(children[0]) ? children.shift() : {};
-    return VDOM.h(tag, attrs, _.flatten(children, true));
-  };
+  htmlTag = {};
 
   ['div', 'span', 'button', 'br', 'input', 'textarea', 'select', 'option', 'table', 'tr', 'th', 'td', 'p', 'a'].forEach(function(tag) {
     return htmlTag[tag] = function() {
-      var children;
+      var attrs, children;
       children = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return htmlTag.apply(null, [tag].concat(__slice.call(children)));
+      attrs = children.length && _.isPlainObject(children[0]) ? children.shift() : {};
+      return VDOM.h(tag, attrs, _.flatten(_.filter(children), true));
     };
   });
 
@@ -164,10 +160,11 @@
   pikaday = null;
 
   model.todos$.subscribe(function(ev) {
-    var datepicker, field, newTree, _i, _len, _ref;
+    var datepicker, diff, field, newTree, _i, _len, _ref;
     newTree = render(ev);
     if (oldTree) {
-      rootNode = VDOM.patch(rootNode, VDOM.diff(oldTree, newTree));
+      diff = VDOM.diff(oldTree, newTree);
+      rootNode = VDOM.patch(rootNode, diff);
     } else {
       rootNode = VDOM.createElement(newTree);
       document.body.appendChild(rootNode);
