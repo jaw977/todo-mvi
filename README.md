@@ -26,20 +26,17 @@ The design is based on [Model-View-Intent](http://futurice.com/blog/reactive-mvc
 - Purge all displayed todos
 - Filter on close date range
 - Double-click Close Date to edit it
+- +project and @context displayed in blue and purple respectively, and may be clicked to search 
+- PouchDB: Sync with CouchDB instance - Live Replication
 
 ## Todo
 
-- Recur a todo manually?
-- Multi-update
 - PouchDB: View to select only open todos
-- PouchDB: Sync to CouchDB
 - Import from todo.txt
-- Recognize / format todo.txt project, context
 - Use Immutable.js
 - package.json for gulp & plugins
 - Use module system / browserify
 - Write tests
-- Config screen
 - Filter on todo description should take effect as it is typed, instead of only when enter is pressed
 - (BUG) The purge button doesn't always purge all the records if many of them are on screen
 - The exposed view streams are Rx.Subject, so any code could call view[stream].onNext.  Find a way to restrict to render.

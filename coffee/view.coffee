@@ -24,6 +24,7 @@ streamNames = [
   'config'
   'couchdb'
   'project'
+  'reset'
 ]
 
 for stream in streamNames

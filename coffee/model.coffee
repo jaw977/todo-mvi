@@ -15,7 +15,6 @@ putDoc = (doc) ->
   pouchdb.put _.clone(doc), (err, result) ->
     throw err if err
     doc._rev = result.rev
-  pouchdb.replicate.to configDoc.couchdb if configDoc.couchdb
   doc
 
 recurUnits =
@@ -52,14 +51,32 @@ load$ = Rx.Observable.create (observer) ->
         todosObj[row.id] = _.create todoModelMethods, row.doc
     observer.onNext()
 
-    if configDoc.couchdb
-      pouchdb.replicate.from configDoc.couchdb
-        .on 'error', -> handleError
-        .on 'complete', ->
-          pouchdb.allDocs include_docs: true, (err, doc) ->
-            for row in doc.rows when row.id != 'config'
-              todosObj[row.id] = _.create todoModelMethods, row.doc
-            observer.onNext()
+load$.subscribe ->
+  if configDoc.couchdb
+    pouchdb.sync configDoc.couchdb, live: true
+      .on 'error', -> handleError
+
+change$ = Rx.Observable.create (observer) ->
+  load$.subscribe ->
+    pouchdb.changes since: (configDoc.changeSeq or 'now'), live: true, include_docs: true
+      .on 'change', (change) ->
+        return if change.deleted
+        doc = change.doc
+        id = doc._id
+        return if id == 'config'
+        if configDoc.changeSeq != change.seq
+          configDoc.changeSeq = change.seq
+          putDoc configDoc
+        if todo = todosObj[id]
+          for key, val of doc
+            if todo[key] != doc[key]
+              changed = true
+              todo[key] = doc[key]
+          observer.onNext todo if changed?
+        else
+          todosObj[id] = _.create todoModelMethods, doc
+          visibleIds.push id
+          observer.onNext todosObj[id]
 
 star$ = intent.star.map (id) ->
   todo = todosObj[id]
@@ -123,6 +140,10 @@ purge$ = intent.purge.map ->
     delete todosObj[id]
   visibleIds = []
 
+intent.reset.subscribe ->
+  pouchdb.destroy ->
+    location.reload()
+
 sort$ = intent.sort.map (sort) -> toView.sort = sort if sort
 searchStatus$ = intent.search.map (status) -> toView.status = status if status
 searchName$ = Rx.Observable.merge intent.searchName, intent.project
@@ -160,7 +181,7 @@ couchdb$ = intent.couchdb.subscribe (server) ->
     "#{closed}#{priority}#{todo.open} #{status}#{todo.name}"
     
   todos$:
-    Rx.Observable.merge create$, star$, search$, export$, edit$, update$, purge$, config$
+    Rx.Observable.merge create$, star$, search$, export$, edit$, update$, purge$, config$, change$
       .map ->
         toView.todos = visibleIds.map (id) -> todosObj[id].clone()
         toView

@@ -1,5 +1,5 @@
 (function() {
-  var close$, closeEnd$, closeStart$, config$, configDoc, couchdb$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, handleError, load$, pouchdb, purge$, putDoc, recurUnits, search$, searchName$, searchStatus$, sort$, star$, toView, todoModelMethods, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
+  var change$, close$, closeEnd$, closeStart$, config$, configDoc, couchdb$, create$, delete$, edit$, editClose$, editName$, editOpen$, export$, handleError, load$, pouchdb, purge$, putDoc, recurUnits, search$, searchName$, searchStatus$, sort$, star$, toView, todoModelMethods, todosObj, update$, updateClose$, updateName$, updateOpen$, visibleIds;
 
   toView = {
     status: 'open',
@@ -28,9 +28,6 @@
       }
       return doc._rev = result.rev;
     });
-    if (configDoc.couchdb) {
-      pouchdb.replicate.to(configDoc.couchdb);
-    }
     return doc;
   };
 
@@ -87,26 +84,57 @@
           todosObj[row.id] = _.create(todoModelMethods, row.doc);
         }
       }
-      observer.onNext();
-      if (configDoc.couchdb) {
-        return pouchdb.replicate.from(configDoc.couchdb).on('error', function() {
-          return handleError;
-        }).on('complete', function() {
-          return pouchdb.allDocs({
-            include_docs: true
-          }, function(err, doc) {
-            var _j, _len1, _ref1;
-            _ref1 = doc.rows;
-            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-              row = _ref1[_j];
-              if (row.id !== 'config') {
-                todosObj[row.id] = _.create(todoModelMethods, row.doc);
-              }
+      return observer.onNext();
+    });
+  });
+
+  load$.subscribe(function() {
+    if (configDoc.couchdb) {
+      return pouchdb.sync(configDoc.couchdb, {
+        live: true
+      }).on('error', function() {
+        return handleError;
+      });
+    }
+  });
+
+  change$ = Rx.Observable.create(function(observer) {
+    return load$.subscribe(function() {
+      return pouchdb.changes({
+        since: configDoc.changeSeq || 'now',
+        live: true,
+        include_docs: true
+      }).on('change', function(change) {
+        var changed, doc, id, key, todo, val;
+        if (change.deleted) {
+          return;
+        }
+        doc = change.doc;
+        id = doc._id;
+        if (id === 'config') {
+          return;
+        }
+        if (configDoc.changeSeq !== change.seq) {
+          configDoc.changeSeq = change.seq;
+          putDoc(configDoc);
+        }
+        if (todo = todosObj[id]) {
+          for (key in doc) {
+            val = doc[key];
+            if (todo[key] !== doc[key]) {
+              changed = true;
+              todo[key] = doc[key];
             }
-            return observer.onNext();
-          });
-        });
-      }
+          }
+          if (changed != null) {
+            return observer.onNext(todo);
+          }
+        } else {
+          todosObj[id] = _.create(todoModelMethods, doc);
+          visibleIds.push(id);
+          return observer.onNext(todosObj[id]);
+        }
+      });
     });
   });
 
@@ -214,6 +242,12 @@
     return visibleIds = [];
   });
 
+  intent.reset.subscribe(function() {
+    return pouchdb.destroy(function() {
+      return location.reload();
+    });
+  });
+
   sort$ = intent.sort.map(function(sort) {
     if (sort) {
       return toView.sort = sort;
@@ -298,7 +332,7 @@
       priority = todo.star ? "(A) " : "";
       return "" + closed + priority + todo.open + " " + status + todo.name;
     },
-    todos$: Rx.Observable.merge(create$, star$, search$, export$, edit$, update$, purge$, config$).map(function() {
+    todos$: Rx.Observable.merge(create$, star$, search$, export$, edit$, update$, purge$, config$, change$).map(function() {
       toView.todos = visibleIds.map(function(id) {
         return todosObj[id].clone();
       });

@@ -51,7 +51,11 @@ render = (ev) ->
     h.button type: 'button', onclick: e.purge, 'Purge all displayed todos'
     h.button type: 'button', onclick: e.config, 'Config'
     if ev.showExport then h.p h.textarea rows: 10, cols: 80, ev.todos.map(model.exportTodo).join "\n"
-    if ev.showConfig then h.p 'CouchDB Server: ', h.input onkeydown: e.couchdb, value: ev.couchdb
+    if ev.showConfig
+      h.p 'CouchDB Server: ',
+        h.input onkeydown: e.couchdb, value: ev.couchdb
+        h.br()
+        h.button type: 'button', onclick: e.reset, 'Reset (delete) the database'
     h.br()
     h.br()
     h.table {},

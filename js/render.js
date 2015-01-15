@@ -94,7 +94,10 @@
     }, ev.todos.map(model.exportTodo).join("\n"))) : void 0, ev.showConfig ? h.p('CouchDB Server: ', h.input({
       onkeydown: e.couchdb,
       value: ev.couchdb
-    })) : void 0, h.br(), h.br(), h.table({}, h.tr({}, (function() {
+    }), h.br(), h.button({
+      type: 'button',
+      onclick: e.reset
+    }, 'Reset (delete) the database')) : void 0, h.br(), h.br(), h.table({}, h.tr({}, (function() {
       var _i, _len, _ref, _results;
       _ref = ['Open', 'Status', 'Description'];
       _results = [];

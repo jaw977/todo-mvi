@@ -33,3 +33,6 @@ for stream in ['updateOpen','updateClose','closeStart','closeEnd']
 
 intent.purge = view.purge
   .filter -> confirm "This will permanently remove all displayed todos from the database!  Are you sure?"
+
+intent.reset = view.reset
+  .filter -> confirm "This will reset (delete) the entire database and all todos!  Are you sure?"
