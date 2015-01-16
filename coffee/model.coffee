@@ -60,7 +60,6 @@ change$ = Rx.Observable.create (observer) ->
   load$.subscribe ->
     pouchdb.changes since: (configDoc.changeSeq or 'now'), live: true, include_docs: true
       .on 'change', (change) ->
-        return if change.deleted
         doc = change.doc
         id = doc._id
         return if id == 'config'
@@ -68,15 +67,13 @@ change$ = Rx.Observable.create (observer) ->
           configDoc.changeSeq = change.seq
           putDoc configDoc
         if todo = todosObj[id]
-          for key, val of doc
-            if todo[key] != doc[key]
-              changed = true
-              todo[key] = doc[key]
-          observer.onNext todo if changed?
-        else
+          if todo._rev != doc._rev
+            _.assign todo, doc
+            observer.onNext()
+        else if not change.deleted
           todosObj[id] = _.create todoModelMethods, doc
           visibleIds.push id
-          observer.onNext todosObj[id]
+          observer.onNext()
 
 star$ = intent.star.map (id) ->
   todo = todosObj[id]
@@ -153,6 +150,7 @@ closeEnd$ = intent.closeEnd.map (date) -> toView.closeEnd = date
 search$ = Rx.Observable.merge load$, sort$, searchStatus$, searchName$, closeStart$, closeEnd$
   .map ->
     todos = for id, todo of todosObj
+      continue if todo._deleted
       continue if toView.status == 'open' and todo.close
       continue if toView.status == 'star' and not todo.star
       continue if toView.status == 'close' and not todo.close

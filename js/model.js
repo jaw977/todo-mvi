@@ -105,10 +105,7 @@
         live: true,
         include_docs: true
       }).on('change', function(change) {
-        var changed, doc, id, key, todo, val;
-        if (change.deleted) {
-          return;
-        }
+        var doc, id, todo;
         doc = change.doc;
         id = doc._id;
         if (id === 'config') {
@@ -119,20 +116,14 @@
           putDoc(configDoc);
         }
         if (todo = todosObj[id]) {
-          for (key in doc) {
-            val = doc[key];
-            if (todo[key] !== doc[key]) {
-              changed = true;
-              todo[key] = doc[key];
-            }
+          if (todo._rev !== doc._rev) {
+            _.assign(todo, doc);
+            return observer.onNext();
           }
-          if (changed != null) {
-            return observer.onNext(todo);
-          }
-        } else {
+        } else if (!change.deleted) {
           todosObj[id] = _.create(todoModelMethods, doc);
           visibleIds.push(id);
-          return observer.onNext(todosObj[id]);
+          return observer.onNext();
         }
       });
     });
@@ -279,6 +270,9 @@
       _results = [];
       for (id in todosObj) {
         todo = todosObj[id];
+        if (todo._deleted) {
+          continue;
+        }
         if (toView.status === 'open' && todo.close) {
           continue;
         }

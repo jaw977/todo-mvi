@@ -112,45 +112,47 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         todo = _ref[_i];
-        _results.push(h.tr({
-          id: todo._id,
-          className: (todo.open <= today || todo.star ? "" : "future")
-        }, ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
-          size: 8,
-          value: todo.open,
-          id: 'datepicker'
-        })) : h.td({
-          ondblclick: e.editOpen
-        }, util.date.short(todo.open)), h.td({}, todo.close ? (className = todo.deleted ? "deleted" : "closed", mark = todo.deleted ? "×" : "✓", [
-          h.span({
-            className: className,
-            onclick: e.close
-          }, "" + mark + " "), ev.idEditing === todo._id && ev.fieldEditing === 'close' ? h.input({
+        if (!todo._deleted) {
+          _results.push(h.tr({
+            id: todo._id,
+            className: (todo.open <= today || todo.star ? "" : "future")
+          }, ev.idEditing === todo._id && ev.fieldEditing === 'open' ? h.td(h.input({
             size: 8,
-            value: todo.close,
+            value: todo.open,
             id: 'datepicker'
-          }) : h.span({
-            className: className,
-            ondblclick: e.editClose
-          }, util.date.short(todo.close))
-        ]) : (className = todo.star ? "starred" : "off", mark = todo.star ? "★" : "☆", [
-          h.span({
-            className: "off",
-            onclick: e.close
-          }, "✓ "), h.span({
-            className: "off",
-            onclick: e.delete$
-          }, "× "), h.span({
-            className: className,
-            onclick: e.star
-          }, "" + mark + " ")
-        ])), ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.td(h.input({
-          size: 50,
-          value: todo.name,
-          onkeydown: e.updateName
-        })) : h.td({
-          ondblclick: e.editName
-        }, renderTodoName(todo))));
+          })) : h.td({
+            ondblclick: e.editOpen
+          }, util.date.short(todo.open)), h.td({}, todo.close ? (className = todo.deleted ? "deleted" : "closed", mark = todo.deleted ? "×" : "✓", [
+            h.span({
+              className: className,
+              onclick: e.close
+            }, "" + mark + " "), ev.idEditing === todo._id && ev.fieldEditing === 'close' ? h.input({
+              size: 8,
+              value: todo.close,
+              id: 'datepicker'
+            }) : h.span({
+              className: className,
+              ondblclick: e.editClose
+            }, util.date.short(todo.close))
+          ]) : (className = todo.star ? "starred" : "off", mark = todo.star ? "★" : "☆", [
+            h.span({
+              className: "off",
+              onclick: e.close
+            }, "✓ "), h.span({
+              className: "off",
+              onclick: e.delete$
+            }, "× "), h.span({
+              className: className,
+              onclick: e.star
+            }, "" + mark + " ")
+          ])), ev.idEditing === todo._id && ev.fieldEditing === 'name' ? h.td(h.input({
+            size: 50,
+            value: todo.name,
+            onkeydown: e.updateName
+          })) : h.td({
+            ondblclick: e.editName
+          }, renderTodoName(todo))));
+        }
       }
       return _results;
     })()));

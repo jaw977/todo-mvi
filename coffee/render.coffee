@@ -62,7 +62,7 @@ render = (ev) ->
       h.tr {}, 
         for heading in ['Open','Status','Description']
           h.th " #{heading} "
-      for todo in ev.todos
+      for todo in ev.todos when not todo._deleted
         h.tr id: todo._id, className: (if todo.open <= today or todo.star then "" else "future"),
           if ev.idEditing == todo._id and ev.fieldEditing == 'open'
             h.td h.input size: 8, value: todo.open, id:'datepicker'
